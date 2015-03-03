@@ -1,3 +1,10 @@
+apertium (3.3.0.56825-2) trusty; urgency=low
+
+  * debian/control:
+    + Provides apertium-dev now.
+
+ -- Kartik Mistry <kartik@debian.org>  Tue, 03 Mar 2015 11:07:50 +0530
+
 apertium (3.3.0.56825-1) trusty; urgency=low
 
   [ Tino Didriksen ]

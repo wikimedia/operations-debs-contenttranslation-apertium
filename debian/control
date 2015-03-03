@@ -68,7 +68,7 @@ Pre-Depends: ${misc:Pre-Depends}
 Depends: libapertium3-3.3-0 (= ${binary:Version}),
          ${misc:Depends},
          ${shlibs:Depends}
-Provides: libapertium3-dev
+Provides: libapertium3-dev, apertium-dev
 Conflicts: libapertium3-dev
 Description: Development library for Apertium
  An open-source shallow-transfer machine translation
