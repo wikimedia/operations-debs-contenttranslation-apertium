@@ -10,21 +10,21 @@ Build-Depends: autoconf,
                dh-autoreconf,
                dh-exec (>= 0.3),
                flex (>= 2.5.33),
-               liblttoolbox3-3.3-dev (>= 3.3),
                libpcre3-dev,
                libxml2-dev,
                libxml2-utils (>= 2.6.24),
+               lttoolbox-dev (>= 3.3.1),
                pkg-config (>= 0.20),
                xsltproc (>= 1.1.16)
-Standards-Version: 3.9.5
+Standards-Version: 3.9.6
 Homepage: http://apertium.org/
-Vcs-Git: git://anonscm.debian.org/debian-science/packages/apertium.git
+Vcs-Git: https://anonscm.debian.org/cgit/debian-science/packages/apertium.git
 Vcs-Browser: https://anonscm.debian.org/cgit/debian-science/packages/apertium.git
 
 Package: apertium
 Architecture: any
 Depends: libxml2-utils (>= 2.6.24),
-         lttoolbox (>= 3.3),
+         lttoolbox (>= 3.3.1),
          xsltproc (>= 1.1.16),
          ${misc:Depends},
          ${shlibs:Depends}
@@ -46,13 +46,14 @@ Description: Shallow-transfer machine translation engine
  systems for a variety of related-language pairs simply providing
  the linguistic data needed in the right format.
 
-Package: libapertium3-3.3-0
+Package: libapertium3-3.4-0
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${misc:Depends}, ${shlibs:Depends}
-Provides: libapertium3
-Conflicts: libapertium3
+Provides: libapertium
+Conflicts: libapertium, libapertium3
+Replaces: libapertium, libapertium3
 Description: Shared library for Apertium
  An open-source shallow-transfer machine translation
  engine, Apertium is initially aimed at related-language pairs.
@@ -60,17 +61,17 @@ Description: Shared library for Apertium
  This package contains shared library for the Apertium
  shallow-transfer machine translation engine.
 
-Package: libapertium3-3.3-dev
-Section: libdevel
+Package: apertium-dev
 Architecture: any
-Multi-Arch: same
-Pre-Depends: ${misc:Pre-Depends}
-Depends: libapertium3-3.3-0 (= ${binary:Version}),
+Depends: apertium (= ${binary:Version}),
+         libpcre3-dev,
+         libxml2-dev,
+         lttoolbox-dev (>= 3.3.1),
          ${misc:Depends},
          ${shlibs:Depends}
-Provides: libapertium3-dev, apertium-dev
 Conflicts: libapertium3-dev
-Description: Development library for Apertium
+Replaces: libapertium3-dev
+Description: Development tools and library for Apertium
  An open-source shallow-transfer machine translation
  engine, Apertium is initially aimed at related-language pairs.
  .
