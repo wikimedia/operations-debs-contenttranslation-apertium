@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 Universitat d'Alacant / Universidad de Alicante
+ * Copyright (C) 2005--2015 Universitat d'Alacant / Universidad de Alicante
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -63,6 +63,7 @@ Interchunk::Interchunk()
   null_flush = false;
   internal_null_flush = false;
   trace = false;
+  emptyblank = "";
 }
 
 Interchunk::~Interchunk()
@@ -108,10 +109,15 @@ Interchunk::readData(FILE *in)
   me = new MatchExe(t, finals);
  
   // attr_items
+  bool recompile_attrs = Compression::string_read(in) != string(pcre_version());
   for(int i = 0, limit = Compression::multibyte_read(in); i != limit; i++)
   {
     string const cad_k = UtfConverter::toUtf8(Compression::wstring_read(in));
     attr_items[cad_k].read(in);
+    wstring fallback = Compression::wstring_read(in);
+    if(recompile_attrs) {
+      attr_items[cad_k].compile(UtfConverter::toUtf8(fallback));
+    }
   }
 
   // variables
@@ -627,12 +633,13 @@ Interchunk::processCallMacro(xmlNode *localroot)
   InterchunkWord **myword = NULL;
   if(npar > 0)
   {
-    myword = new InterchunkWord *[npar];  
+    myword = new InterchunkWord *[npar];
   }
   string **myblank = NULL;
-  if(npar > 1)
+  if(npar > 0)
   {
-    myblank = new string *[npar - 1];
+    myblank = new string *[npar];
+    myblank[npar-1] = &emptyblank;
   }
 
   int idx = 0;
@@ -655,7 +662,7 @@ Interchunk::processCallMacro(xmlNode *localroot)
   swap(myword, word);
   swap(myblank, blank);
   swap(npar, lword);
-  
+
   for(xmlNode *i = macro->children; i != NULL; i = i->next)
   {
     if(i->type == XML_ELEMENT_NODE)

@@ -803,6 +803,9 @@ HMM::tagger(FILE *in, FILE *out, bool show_all_good_first) {
 #ifdef __GNUC__
     clear_array_double(alpha[nwpend%2], N);    
     clear_array_vector(best[nwpend%2], N);
+#else
+    clear_array_double(&alpha[nwpend%2][0], N);    
+    clear_array_vector(&best[nwpend%2][0], N);
 #endif
     
     //Induction
@@ -856,6 +859,9 @@ HMM::tagger(FILE *in, FILE *out, bool show_all_good_first) {
       if(null_flush)
       { 
         fputwc_unlocked(L'\0', out);
+        tags.clear();
+        tags.insert(eos);
+        alpha[0][eos] = 1;
       }
       
       fflush(out);
