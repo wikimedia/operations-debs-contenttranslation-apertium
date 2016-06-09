@@ -2,7 +2,7 @@ Source: apertium
 Section: science
 Priority: optional
 Maintainer: Debian Science Team <debian-science-maintainers@lists.alioth.debian.org>
-Uploaders: Tino Didriksen <mail@tinodidriksen.com>,
+Uploaders: Tino Didriksen <tino@didriksen.cc>,
            Kartik Mistry <kartik@debian.org>
 Build-Depends: autoconf,
                autotools-dev,
@@ -13,10 +13,11 @@ Build-Depends: autoconf,
                libpcre3-dev,
                libxml2-dev,
                libxml2-utils (>= 2.6.24),
-               lttoolbox-dev (>= 3.3.1),
+               lttoolbox-dev (>= 3.3.3~r68466),
                pkg-config (>= 0.20),
+               python3,
                xsltproc (>= 1.1.16)
-Standards-Version: 3.9.6
+Standards-Version: 3.9.8
 Homepage: http://apertium.org/
 Vcs-Git: https://anonscm.debian.org/cgit/debian-science/packages/apertium.git
 Vcs-Browser: https://anonscm.debian.org/cgit/debian-science/packages/apertium.git
@@ -24,7 +25,7 @@ Vcs-Browser: https://anonscm.debian.org/cgit/debian-science/packages/apertium.gi
 Package: apertium
 Architecture: any
 Depends: libxml2-utils (>= 2.6.24),
-         lttoolbox (>= 3.3.1),
+         lttoolbox (>= 3.3.3~r68466),
          xsltproc (>= 1.1.16),
          ${misc:Depends},
          ${shlibs:Depends}
@@ -66,7 +67,7 @@ Architecture: any
 Depends: apertium (= ${binary:Version}),
          libpcre3-dev,
          libxml2-dev,
-         lttoolbox-dev (>= 3.3.1),
+         lttoolbox-dev (>= 3.3.3~r68466),
          ${misc:Depends},
          ${shlibs:Depends}
 Conflicts: libapertium3-dev
@@ -77,3 +78,16 @@ Description: Development tools and library for Apertium
  .
  This package contains development files for the Apertium
  shallow-transfer machine translation engine.
+
+Package: apertium-all-dev
+Architecture: all
+Depends: apertium-dev (>= ${source:Version}),
+         apertium-lex-tools (>= 0.1.1~r60994),
+         cg3 (>= 0.9.9~r11621),
+         hfst (>= 3.10.0~r2798),
+         libhfst45-dev (>= 3.10.0~r2798),
+         ${misc:Depends}
+Description: Metapackage for all tools required for Apertium development
+ A metapackage to get all tools required for development of Apertium
+ languages and pairs, such as lttoolbox, apertium, apertium-lex-tools,
+ cg3, and hfst.

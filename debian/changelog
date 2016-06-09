@@ -1,3 +1,23 @@
+apertium (3.4.2~r68466-2+wmf1) jessie; urgency=low
+
+  * Rebuild for Jessie
+  * Revert: Use dpkg triggers instead of postinst.
+
+ -- Kartik Mistry <kartik@debian.org>  Thu, 09 Jun 2016 18:01:35 +0530
+
+apertium (3.4.2~r68466-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * New upstream release.
+  * New binary metapackage: apertium-all-dev.
+
+  [ Kartik Mistry ]
+  * debian/control:
+    + Updated Standards-Version to 3.9.8
+  * Use dpkg triggers instead of postinst.
+
+ -- Kartik Mistry <kartik@debian.org>  Wed, 08 Jun 2016 09:07:31 +0530
+
 apertium (3.4.0~r61013-5) unstable; urgency=medium
 
   * Rebuild for lttoolbox, again.
