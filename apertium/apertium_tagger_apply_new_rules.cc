@@ -13,9 +13,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
- * 02111-1307, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <fstream>
@@ -52,9 +50,9 @@ void help(char *name) {
 
   cerr<<"ARGUMENTS: \n"
       <<"   --filein|-i: To specify the file with the HMM parameter to process\n\n"
-      <<"   --fileout|-o: To specify the file to which the HMM will be writen\n\n"
+      <<"   --fileout|-o: To specify the file to which the HMM will be written\n\n"
       <<"   --tsxfile|-x: File containing the rules to apply\n\n"
-      <<"NOTE: Parameters are read from and writen to the files provided\n";
+      <<"NOTE: Parameters are read from and written to the files provided\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -115,9 +113,7 @@ int main(int argc, char* argv[]) {
 	  <<"   General Public License for more details.\n"
 	  <<"\n"
 	  <<"   You should have received a copy of the GNU General Public License\n"
-	  <<"   along with this program; if not, write to the Free Software\n"
-	  <<"   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA\n"
-	  <<"   02111-1307, USA.\n";
+	  <<"   along with this program; if not, see <http://www.gnu.org/licenses/>.\n";
       exit(EXIT_SUCCESS);
       break;    
     default:
@@ -171,7 +167,7 @@ int main(int argc, char* argv[]) {
   fout=fopen(fileout.c_str(), "wb");
   check_file(fout, fileout);
   cerr<<"Writing apertium-tagger data to file '"<<fileout<<"' ... "<<flush;
-  tagger_data_hmm.write(fout);
+  hmm.serialise(fout);
   fclose(fout);
   cerr<<"done.\n";
 }

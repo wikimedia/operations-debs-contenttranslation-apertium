@@ -12,9 +12,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
- * 02111-1307, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 #include <apertium/postchunk.h>
 #include <apertium/trx_reader.h>
@@ -34,11 +32,6 @@ using namespace Apertium;
 using namespace std;
 
 void
-Postchunk::copy(Postchunk const &o)
-{
-}
-
-void
 Postchunk::destroy()
 {
   if(me)
@@ -53,7 +46,15 @@ Postchunk::destroy()
   }  
 }
 
-Postchunk::Postchunk()
+Postchunk::Postchunk() :
+word(0),
+blank(0),
+lword(0),
+lblank(0),
+output(0),
+any_char(0),
+any_tag(0),
+nwords(0)
 {
   me = NULL;
   doc = NULL;
@@ -67,22 +68,6 @@ Postchunk::Postchunk()
 Postchunk::~Postchunk()
 {
   destroy();
-}
-
-Postchunk::Postchunk(Postchunk const &o)
-{
-  copy(o);
-}
-
-Postchunk &
-Postchunk::operator =(Postchunk const &o)
-{
-  if(this != &o)
-  {
-    destroy();
-    copy(o);
-  }
-  return *this;
 }
 
 void 
@@ -743,6 +728,11 @@ Postchunk::processCallMacro(xmlNode *localroot)
       break;
     }
   }
+  
+  if (npar <= 0)
+  {
+    throw "Postchunk::processCallMacro() assumes npar > 0, but got npar <= 0";
+  }
 
   InterchunkWord **myword = NULL;
   if(npar > 0)
@@ -764,6 +754,9 @@ Postchunk::processCallMacro(xmlNode *localroot)
     if(i->type == XML_ELEMENT_NODE)
     {
       int pos = atoi((const char *) i->properties->children->content);
+      if(!checkIndex(localroot, pos, lword)) {
+        pos=1; // for a rule to match, there has to be at least one word, so should be safe
+      }
       myword[idx] = word[pos];
       if(blank)
       {
@@ -791,14 +784,8 @@ Postchunk::processCallMacro(xmlNode *localroot)
   swap(myblank, blank);
   swap(npar, lword);
 
-  if(myword)
-  {
-    delete[] myword;
-  }
-  if(myblank)
-  {
-    delete[] myblank;
-  }
+  delete[] myword;
+  delete[] myblank;
 }
 
 void
@@ -1654,7 +1641,7 @@ Postchunk::applyRule()
   splitWordsAndBlanks(chunk, tmpword, tmpblank);
 
   word = new InterchunkWord *[tmpword.size()+1];
-  lword = tmpword.size()+1;
+  lword = tmpword.size();
   word[0] = new InterchunkWord(UtfConverter::toUtf8(wordzero(chunk)));
 
   for(unsigned int i = 1, limit = tmpword.size()+1; i != limit; i++)
@@ -1664,7 +1651,7 @@ Postchunk::applyRule()
       if(limit != 2)
       {
         blank = new string *[limit - 2];
-        lblank = limit - 2;
+        lblank = limit - 3;
       }
       else
       {
@@ -1689,7 +1676,7 @@ Postchunk::applyRule()
     {
       delete word[i];
     }
-    delete word;
+    delete[] word;
   }
   if(blank)
   {
@@ -1697,7 +1684,7 @@ Postchunk::applyRule()
     {
       delete blank[i];
     }
-    delete blank;
+    delete[] blank;
   }
   word = NULL;
   blank = NULL;

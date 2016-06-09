@@ -1,29 +1,155 @@
-h_sources = collection.h constant_manager.h hmm.h lswpost.h interchunk.h \
-            interchunk_word.h lextor_data.h lextor_eval.h lextor.h \
-            lextor_word.h morpho_stream.h postchunk.h string_utils.h \
-            tagger_data.h tagger_data_hmm.h tagger_data_lsw.h tagger.h tagger_utils.h tagger_word.h \
-            transfer_data.h transfer.h transfer_instr.h transfer_token.h \
-            transfer_word.h transfer_word_list.h trx_reader.h tsx_reader.h \
-            ttag.h utf_converter.h apertium_re.h unlocked_cstdio.h \
-            endian_double_util.h transfer_mult.h tmx_builder.h \
-            tmx_alignment.h tmx_arguments_parser.h tmx_book_to_matrix.h \
-            tmx_dictionary.h tmx_dic_tree.h tmx_quasi_diagonal.h \
-            tmx_serialize_impl.h tmx_strings_and_streams.h \
-            tmx_trail_postprocessors.h tmx_translate.h tmx_words.h \
-            tmx_align_parameters.h tmx_aligner_tool.h latex_accentsmap.h
+AUTOMAKE_OPTIONS = subdir-objects
 
-cc_sources = collection.cc constant_manager.cc hmm.cc lswpost.cc interchunk.cc \
-             interchunk_word.cc lextor.cc lextor_data.cc lextor_eval.cc \
-             lextor_word.cc morpho_stream.cc postchunk.cc string_utils.cc \
-             tagger.cc tagger_data.cc tagger_data_hmm.cc tagger_data_lsw.cc tagger_utils.cc tagger_word.cc \
-             transfer.cc transfer_data.cc transfer_instr.cc \
-             transfer_token.cc transfer_word.cc transfer_word_list.cc \
-             trx_reader.cc tsx_reader.cc utf_converter.cc apertium_re.cc \
-             endian_double_util.cc transfer_mult.cc tmx_builder.cc \
-             tmx_aligner_tool.cc tmx_alignment.cc tmx_arguments_parser.cc \
-             tmx_book_to_matrix.cc tmx_dictionary.cc \
-             tmx_strings_and_streams.cc tmx_trail_postprocessors.cc \
-             tmx_translate.cc latex_accentsmap.cc
+h_sources = a.h \
+	    align.h \
+	    analysis.h \
+	    apertium_re.h \
+	    apertium_tagger.h \
+	    basic_5_3_1_tagger.h \
+	    basic_5_3_2_tagger.h \
+	    basic_5_3_3_tagger.h \
+	    basic_exception_type.h \
+	    basic_stream_tagger.h \
+	    basic_stream_tagger_trainer.h \
+	    basic_tagger.h \
+	    collection.h \
+	    constant_manager.h \
+	    constructor_eq_delete.h \
+	    deserialiser.h \
+	    endian_double_util.h \
+	    err_exception.h \
+	    exception.h \
+	    exception_type.h \
+	    file_tagger.h \
+	    hmm.h \
+	    i.h \
+	    interchunk.h \
+	    interchunk_word.h \
+	    latex_accentsmap.h \
+	    lemma.h \
+	    lexical_unit.h \
+	    linebreak.h \
+	    lswpost.h \
+	    morpheme.h \
+	    morpho_stream.h \
+	    optional.h \
+	    postchunk.h \
+	    serialiser.h \
+	    stream.h \
+	    stream_5_3_1_tagger.h \
+	    stream_5_3_2_tagger.h \
+	    stream_5_3_3_tagger.h \
+	    stream_5_3_1_tagger_trainer.h \
+	    stream_5_3_2_tagger_trainer.h \
+	    stream_5_3_3_tagger_trainer.h \
+	    streamed_type.h \
+	    string_utils.h \
+	    tag.h \
+	    tagger_data.h \
+	    tagger_data_hmm.h \
+	    tagger_data_lsw.h \
+	    tagger_utils.h \
+	    tagger_word.h \
+	    tmx_aligner_tool.h \
+	    tmx_alignment.h \
+	    tmx_align_parameters.h \
+	    tmx_arguments_parser.h \
+	    tmx_book_to_matrix.h \
+	    tmx_builder.h \
+	    tmx_dictionary.h \
+	    tmx_dic_tree.h \
+	    tmx_quasi_diagonal.h \
+	    tmx_serialize_impl.h \
+	    tmx_strings_and_streams.h \
+	    tmx_trail_postprocessors.h \
+	    tmx_translate.h \
+	    tmx_words.h \
+	    transfer_data.h \
+	    transfer.h \
+	    transfer_instr.h \
+	    transfer_mult.h \
+	    transfer_token.h \
+	    transfer_word.h \
+	    transfer_word_list.h \
+	    trx_reader.h \
+	    tsx_reader.h \
+	    ttag.h \
+	    unlocked_cstdio.h \
+	    utf_converter.h \
+	    wchar_t_exception.h \
+	    wchar_t_exception_type.h
+
+#DEPR.:
+#	    lextor_data.h
+#	    lextor_eval.h
+#	    lextor.h
+#	    lextor_word.h
+
+cc_sources = a.cc \
+	     align.cc \
+	     analysis.cc \
+	     apertium_re.cc \
+	     basic_5_3_1_tagger.cc \
+	     basic_5_3_2_tagger.cc \
+	     basic_exception_type.cc \
+	     basic_stream_tagger.cc \
+	     basic_stream_tagger_trainer.cc \
+	     basic_tagger.cc \
+	     collection.cc \
+	     constant_manager.cc \
+	     endian_double_util.cc \
+	     exception_type.cc \
+	     file_tagger.cc \
+	     hmm.cc \
+	     i.cc \
+	     interchunk.cc \
+	     interchunk_word.cc \
+	     latex_accentsmap.cc \
+	     lemma.cc \
+	     linebreak.cc \
+	     lswpost.cc \
+	     morpheme.cc \
+	     morpho_stream.cc \
+	     postchunk.cc \
+	     stream.cc \
+	     stream_5_3_1_tagger.cc \
+	     stream_5_3_2_tagger.cc \
+	     stream_5_3_3_tagger.cc \
+	     stream_5_3_1_tagger_trainer.cc \
+	     stream_5_3_2_tagger_trainer.cc \
+	     stream_5_3_3_tagger_trainer.cc \
+	     string_utils.cc \
+	     tag.cc \
+	     tagger_data.cc \
+	     tagger_data_hmm.cc \
+	     tagger_data_lsw.cc \
+	     tagger_utils.cc \
+	     tagger_word.cc \
+	     tmx_aligner_tool.cc \
+	     tmx_alignment.cc \
+	     tmx_arguments_parser.cc \
+	     tmx_book_to_matrix.cc \
+	     tmx_builder.cc \
+	     tmx_dictionary.cc \
+	     tmx_strings_and_streams.cc \
+	     tmx_trail_postprocessors.cc \
+	     tmx_translate.cc \
+	     transfer.cc \
+	     transfer_data.cc \
+	     transfer_instr.cc \
+	     transfer_mult.cc \
+	     transfer_token.cc \
+	     transfer_word.cc \
+	     transfer_word_list.cc \
+	     trx_reader.cc \
+	     tsx_reader.cc \
+	     utf_converter.cc \
+	     wchar_t_exception_type.cc
+#DEPR.:
+#	     lextor.cc
+#	     lextor_data.cc
+#	     lextor_eval.cc
+#	     lextor_word.cc
 
 library_includedir = $(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)
 library_include_HEADERS = $(h_sources)
@@ -46,30 +172,41 @@ lib_LTLIBRARIES = libapertium3.la
 libapertium3_la_SOURCES = $(h_sources) $(cc_sources)
 libapertium3_la_LDFLAGS = -version-info $(GENERIC_LIBRARY_VERSION) -release $(GENERIC_RELEASE)
 
-bin_PROGRAMS = apertium-pretransfer apertium-destxt apertium-retxt \
-               apertium-deshtml apertium-rehtml \
-               apertium-rehtml-noent \
-               apertium-desxpresstag apertium-rexpresstag \
-               apertium-desodt apertium-reodt \
-               apertium-desrtf apertium-rertf \
-               apertium-deswxml apertium-rewxml \
-               apertium-deslatex apertium-relatex \
-               apertium-desxlsx apertium-rexlsx \
-               apertium-despptx apertium-repptx \
-               apertium-desmediawiki apertium-remediawiki \
-               apertium-prelatex apertium-postlatex \
-               apertium-postlatex-raw \
-               apertium-tagger \
-               apertium-preprocess-transfer apertium-transfer \
-               apertium-filter-ambiguity  \
-               apertium-interchunk apertium-postchunk \
-               apertium-multiple-translations \
-               apertium-tagger-apply-new-rules \
-               apertium-tagger-readwords \
-               apertium-tmxbuild
-               ###pruebas-lextor apertium-lextor-search apertium-lextor-eval
-               ###apertium-gen-wlist-lextor-translation
-               ###apertium-lextor
+bin_PROGRAMS = apertium-deshtml \
+	       apertium-deslatex \
+	       apertium-desmediawiki \
+	       apertium-desodt \
+	       apertium-despptx \
+	       apertium-desrtf \
+	       apertium-destxt \
+	       apertium-deswxml \
+	       apertium-desxlsx \
+	       apertium-desxpresstag \
+	       apertium-filter-ambiguity \
+	       apertium-interchunk \
+	       apertium-multiple-translations \
+	       apertium-postchunk \
+	       apertium-postlatex \
+	       apertium-postlatex-raw \
+	       apertium-prelatex \
+	       apertium-preprocess-transfer \
+	       apertium-pretransfer \
+	       apertium-rehtml \
+	       apertium-rehtml-noent \
+	       apertium-relatex \
+	       apertium-remediawiki \
+	       apertium-reodt \
+	       apertium-repptx \
+	       apertium-rertf \
+	       apertium-retxt \
+	       apertium-rewxml \
+	       apertium-rexlsx \
+	       apertium-rexpresstag \
+	       apertium-tagger \
+	       apertium-tagger-apply-new-rules \
+	       apertium-tagger-readwords \
+	       apertium-tmxbuild \
+	       apertium-transfer
 
 bin_SCRIPTS =  $(GENERATEDSCRIPTS)
 
@@ -81,8 +218,10 @@ apertiumlib = $(prefix)/lib
 apertiumsysconf = $(prefix)/etc/apertium
 
 apertium_DATA = deformat.xsl reformat.xsl new2old.xsl lexchoice.xsl \
-                lexchoicebil.xsl tagger.dtd interchunk.dtd format.dtd \
-                transfer.dtd postchunk.dtd modes.dtd modes2bash.xsl \
+                lexchoicebil.xsl \
+				tagger.dtd interchunk.dtd format.dtd  transfer.dtd postchunk.dtd modes.dtd \
+				tagger.rnc interchunk.rnc format.rnc  transfer.rnc postchunk.rnc modes.rnc \
+				modes2bash.xsl modes2debugmodes.xsl \
                 apertium-createmodes.awk
 
 apertium_pretransfer_SOURCES = apertium_pretransfer.cc
@@ -372,16 +511,12 @@ apertium-gen-reformat: Makefile.am gen-header.sh
 	@echo "rm /tmp/\$$\$$.reformat.l /tmp/\$$\$$.lex.cc" >> $@
 	@chmod a+x $@
 
-apertium-gen-modes: Makefile.am modes-header.sh
-	@echo "Creating apertium-gen-modes script"
+apertium-gen-modes: apertium-gen-modes.in
 	@echo "#!$(BASH)" > $@
-	@echo "APERTIUMDIR="$(apertiumdir) >> $@
-	@cat modes-header.sh >> $@
-	@echo "$(XMLLINT) --dtdvalid $(apertiumdir)/modes.dtd --noout \$$FILE1 && \\" >> $@
-	@if [ `basename $(XSLTPROC)` == xsltproc ]; \
-	  then echo "$(XSLTPROC) --stringparam prefix $(prefix)/bin --stringparam dataprefix \$$FULLDIRNAME  $(apertiumdir)/modes2bash.xsl \$$FILE1 | awk -f $(apertiumdir)/apertium-createmodes.awk PARAM=\$$FULLDIRNAME"; \
-          else echo "$(XSLTPROC) $(apertiumdir)/modes2bash.xsl \$$FILE1 \\\$$prefix=$(prefix)/bin \\\$$dataprefix=\$$FULLDIRNAME| awk -f $(apertiumdir)/apertium-createmodes.awk PARAM=\$$FULLDIRNAME"; \
-          fi >> $@
+	@echo "APERTIUMDIR=$(apertiumdir)" >> $@
+	@echo "XMLLINT=$(XMLLINT)" >> $@
+	@echo "XSLTPROC=$(XSLTPROC)" >> $@
+	cat $< >> $@
 	@chmod a+x $@
 
 apertium-utils-fixlatex: Makefile.am utils-fixlatex-header.sh
@@ -478,10 +613,8 @@ man_MANS=apertium.1 apertium-deshtml.1 apertium-desrtf.1 apertium-destxt.1 \
          apertium-desxlsx.1 apertium-rexlsx.1 \
          apertium-despptx.1 apertium-repptx.1 \
          apertium-desmediawiki.1 apertium-remediawiki.1 \
-         apertium-filter-ambiguity.1 apertium-gen-deformat.1 apertium-gen-lextorbil.1 \
-         apertium-gen-lextormono.1 apertium-gen-reformat.1 apertium-gen-stopwords-lextor.1 \
-         apertium-gen-wlist-lextor.1 apertium-gen-wlist-lextor-translation.1 \
-         apertium-lextor.1 apertium-preprocess-corpus-lextor.1 \
+         apertium-filter-ambiguity.1 apertium-gen-deformat.1 \
+         apertium-gen-reformat.1 \
          apertium-preprocess-transfer.1 apertium-pretransfer.1 apertium-rehtml.1 \
          apertium-rertf.1 apertium-retxt.1 apertium-tagger.1 apertium-transfer.1 \
          apertium-validate-dictionary.1 apertium-validate-tagger.1 \
@@ -490,11 +623,16 @@ man_MANS=apertium.1 apertium-deshtml.1 apertium-desrtf.1 apertium-destxt.1 \
          apertium-validate-postchunk.1 apertium-validate-modes.1 apertium-tagger-apply-new-rules.1 \
 	 apertium-validate-acx.1 apertium-multiple-translations.1 \
 	 apertium-unformat.1
-         ###apertium-lextor-eval.1
+#DEPR.:
+#         apertium-lextor-eval.1
+#         apertium-gen-lextorbil.1
+#         apertium-gen-lextormono.1 apertium-gen-stopwords-lextor.1
+#         apertium-gen-wlist-lextor.1 apertium-gen-wlist-lextor-translation.1
+#         apertium-lextor.1 apertium-preprocess-corpus-lextor.1
 
 EXTRA_DIST = gen-header.sh deformat-header.sh \
              reformat.xsl deformat.xsl new2old.xsl lexchoice.xsl lexchoicebil.xsl \
-             tagger.dtd transfer.dtd format.dtd txt-format.xml \
+             txt-format.xml \
              html-format.xml odt-format.xml rtf-format.xml wxml-format.xml latex-format.xml\
              html-noent-format.xml \
              xlsx-format.xml pptx-format.xml mediawiki-format.xml trans-header.sh \
@@ -502,7 +640,12 @@ EXTRA_DIST = gen-header.sh deformat-header.sh \
              apertium-header.sh apertium-unformat-header.sh $(man_MANS) \
              xpresstag-format.xml \
              validate-header.sh transformdic-header.sh transformdicbil-header.sh \
-             gen-wlist-lextor-header.sh gen-stopwords-lextor.sh preprocess-corpus-lextor.sh \
-             interchunk.dtd postchunk.dtd modes.dtd \
+			 tagger.dtd interchunk.dtd format.dtd  transfer.dtd postchunk.dtd modes.dtd \
+			 tagger.rnc interchunk.rnc format.rnc  transfer.rnc postchunk.rnc modes.rnc \
              utils-fixlatex-header.sh \
-             modes-header.sh apertium-createmodes.awk modes2bash.xsl ###trans-lextor-header.sh
+             apertium-gen-modes.in apertium-createmodes.awk modes2bash.xsl modes2debugmodes.xsl
+#DEPR.:
+# trans-lextor-header.sh
+# gen-wlist-lextor-header.sh
+# gen-stopwords-lextor.sh
+# preprocess-corpus-lextor.sh

@@ -12,9 +12,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
- * 02111-1307, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 #include <apertium/trx_reader.h>
 #include <lttoolbox/xml_parse_util.h>
@@ -32,17 +30,14 @@ wstring const
 TRXReader::ANY_CHAR = L"<ANY_CHAR>";
 
 void
-TRXReader::copy(TRXReader const &o)
-{
-}
-
-void
 TRXReader::destroy()
 {
   xmlFreeTextReader(reader);
 }
 
-TRXReader::TRXReader()
+TRXReader::TRXReader() :
+reader(0),
+type(0)
 {
   td.getAlphabet().includeSymbol(ANY_TAG);
   td.getAlphabet().includeSymbol(ANY_CHAR);
@@ -51,11 +46,6 @@ TRXReader::TRXReader()
 TRXReader::~TRXReader()
 {
   destroy();
-}
-
-TRXReader::TRXReader(TRXReader const &o)
-{
-  copy(o);
 }
 
 void
@@ -68,17 +58,6 @@ TRXReader::step()
   }
   name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
   type = xmlTextReaderNodeType(reader);
-}
-
-TRXReader &
-TRXReader::operator =(TRXReader const &o)
-{
-  if(this != &o)
-  {
-    destroy();
-    copy(o);
-  }
-  return *this;
 }
 
 wstring

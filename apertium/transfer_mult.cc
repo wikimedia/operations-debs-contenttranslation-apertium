@@ -12,9 +12,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
- * 02111-1307, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 #include <apertium/transfer_mult.h>
 #include <apertium/trx_reader.h>
@@ -30,11 +28,6 @@
 using namespace std;
 
 void
-TransferMult::copy(TransferMult const &o)
-{
-}
-
-void
 TransferMult::destroy()
 {
   if(me)
@@ -44,7 +37,13 @@ TransferMult::destroy()
   }
 }
 
-TransferMult::TransferMult()
+TransferMult::TransferMult() :
+word(0),
+blank(0),
+output(0),
+any_char(0),
+any_tag(0),
+nwords(0)
 {
   me = NULL;
   isRule = false;
@@ -55,22 +54,6 @@ TransferMult::TransferMult()
 TransferMult::~TransferMult()
 {
   destroy();
-}
-
-TransferMult::TransferMult(TransferMult const &o)
-{
-  copy(o);
-}
-
-TransferMult &
-TransferMult::operator =(TransferMult const &o)
-{
-  if(this != &o)
-  {
-    destroy();
-    copy(o);
-  }
-  return *this;
 }
 
 string
