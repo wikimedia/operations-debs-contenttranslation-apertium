@@ -1,3 +1,10 @@
+apertium (3.4.2~r68466-2+wmf2) jessie-wikimedia; urgency=low
+
+  * debian/control:
+    + Fixed Depends for apertium-all-dev
+
+ -- Kartik Mistry <kartik@debian.org>  Thu, 07 Sep 2017 17:15:55 +0530
+
 apertium (3.4.2~r68466-2+wmf1) jessie; urgency=low
 
   * Rebuild for Jessie
