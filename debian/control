@@ -83,7 +83,7 @@ Package: apertium-all-dev
 Architecture: all
 Depends: apertium-dev (>= ${source:Version}),
          apertium-lex-tools (>= 0.1.1~r60994),
-         cg3 (>= 0.9.9~r11621),
+         cg3 (>= 1.0.0~r12254),
          hfst (>= 3.13.0~r3461),
          libhfst-dev (>= 3.13.0~r3461),
          ${misc:Depends}
