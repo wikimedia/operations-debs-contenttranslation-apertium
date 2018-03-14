@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <apertium/latex_accentsmap.h>
+#include <apertium/string_utils.h>
 
 extern "C" {
 #if !defined(__STDC__)
@@ -420,9 +421,9 @@ wstring convertir(string const &multibyte, int const length)
 void usage(string const &progname)
 {
 
-  cerr << "USAGE: " << progname << " [input_file [output_file]" << ']' << endl;
+  wcerr << "USAGE: " << progname << " [input_file [output_file]" << ']' << endl;
 
-  cerr << "LaTeX format preprocessor " << endl;
+  wcerr << "LaTeX format preprocessor " << endl;
   exit(EXIT_SUCCESS);
 }
 
@@ -460,7 +461,7 @@ int main(int argc, char *argv[])
       break;
   }
 
-#ifdef _WIN32
+#ifdef _MSC_VER
   _setmode(_fileno(yyin), _O_U8TEXT);
   _setmode(_fileno(yyout), _O_U8TEXT);
 #endif

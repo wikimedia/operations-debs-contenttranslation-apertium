@@ -1,0 +1,45 @@
+ERROR: Invalid option: -?
+
+USAGE
+       apertium-get PAIR
+       apertium-get -l [MODULE...]
+
+DESCRIPTION
+       Run with just one argument, it will download and set up the
+       Apertium development data for the specified language pair.
+
+       With the -l option, it will list available language pairs. Give
+       one or more MODULE arguments to list only pairs in that SVN
+       module (one of "trunk", "staging", "nursery", "incubator").
+       The same behavior can be invoked for language modules using -m.
+
+OPTIONS
+       -h          display this help and exit
+       -l          list available packages instead of setting up data
+       -m          list available language modules instead of setting up
+                   data
+       -k          keep going even if a dependency fails
+       -s          skip the build step for up-to-date dependencies/pairs
+       -x DEP      skip data dependency DEP (useful if DEP is installed
+                   through a package manager); may be specified multiple
+                   times
+
+EXAMPLES
+       apertium-get nno-nob
+
+       Download and set up apertium-nno-nob, along with its nno and
+       nob dependencies.
+
+       sudo apt-get install giella-sme
+       apertium-get -x sme sme-nob
+
+       Install giella-sme through apt-get, then install download and set
+       up apertium-sme-nob, along with the nob dependency (but not sme).
+
+       apertium-get -l trunk
+
+       List available language pairs in SVN trunk.
+
+       apertium-get -l | grep kaz
+
+       List available language pairs involving Kazakh.

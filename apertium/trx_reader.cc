@@ -29,49 +29,10 @@ TRXReader::ANY_TAG = L"<ANY_TAG>";
 wstring const
 TRXReader::ANY_CHAR = L"<ANY_CHAR>";
 
-void
-TRXReader::destroy()
-{
-  xmlFreeTextReader(reader);
-}
-
-TRXReader::TRXReader() :
-reader(0),
-type(0)
+TRXReader::TRXReader()
 {
   td.getAlphabet().includeSymbol(ANY_TAG);
   td.getAlphabet().includeSymbol(ANY_CHAR);
-}
-
-TRXReader::~TRXReader()
-{
-  destroy();
-}
-
-void
-TRXReader::step()
-{
-  int retval = xmlTextReaderRead(reader);
-  if(retval != 1)
-  {
-    parseError(L"unexpected EOF");
-  }
-  name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
-  type = xmlTextReaderNodeType(reader);
-}
-
-wstring
-TRXReader::attrib(wstring const &name)
-{
-  return XMLParseUtil::attrib(reader, name);
-} 
-
-void
-TRXReader::parseError(wstring const &message)
-{
-  wcerr << L"Error: (" << xmlTextReaderGetParserLineNumber(reader);
-  wcerr << L"): " << message << L"." << endl;
-  exit(EXIT_FAILURE);
 }
 
 int
@@ -161,15 +122,8 @@ TRXReader::insertTags(int const base, wstring const &tags)
 }
 
 void
-TRXReader::read(string const &filename)
+TRXReader::parse()
 {
-  reader = xmlReaderForFile(filename.c_str(), NULL, 0);
-  if(reader == NULL)
-  {
-    cerr << "Error: Cannot open '" << filename << "'." << endl;
-    exit(EXIT_FAILURE);
-  }
-
   procDefCats();
   step();
   while(name == L"#text" || name == L"#comment")
@@ -257,16 +211,18 @@ TRXReader::procRules()
         for(set<int>::iterator it = alive_states.begin(), limit = alive_states.end();
             it != limit; it++)
         {
-          td.getTransducer().setFinal(*it);
-          if(td.getFinals().find(*it) == td.getFinals().end())
+          if(td.seen_rules.find(*it) == td.seen_rules.end())
           {
-            td.getFinals()[*it] = count;
-          }       
+            const int symbol = td.countToFinalSymbol(count);
+            const int fin = td.getTransducer().insertSingleTransduction(symbol, *it);
+            td.getTransducer().setFinal(fin);
+            td.seen_rules[*it] = count;
+          }
           else
           {
             wcerr << L"Warning (" << xmlTextReaderGetParserLineNumber(reader);
             wcerr << L"): "
-              << L"Paths to rule " << count << " blocked by rule " << td.getFinals()[*it]
+              << L"Paths to rule " << count << " blocked by rule " << td.seen_rules[*it]
               << L"." << endl;
 
           }
@@ -355,8 +311,8 @@ TRXReader::write(string const &filename)
   FILE *out = fopen(filename.c_str(), "wb");
   if(!out)
   {
-    cerr << "Error: cannot open '" << filename;
-    cerr << "' for writing" << endl;
+    wcerr << "Error: cannot open '" << filename;
+    wcerr << "' for writing" << endl;
     exit(EXIT_FAILURE);
   }
   
@@ -408,7 +364,7 @@ TRXReader::procDefAttrs()
     }
     else
     {
-      parseError(L"Unexpected '<" + name + L">' tag");
+      unexpectedTag();
     }
   }
 }
@@ -422,7 +378,7 @@ TRXReader::procDefCats()
     if(name != L"#text" && name != L"transfer" &&  name != L"interchunk" &&
        name != L"postchunk" && name != L"section-def-cats" && name != L"#comment")
     {
-      parseError(L"'<" + name + L">' tag unexpected");
+      unexpectedTag();
     }
   }
   
@@ -471,7 +427,7 @@ TRXReader::procDefCats()
     }
     else
     {
-      parseError(L"Unexpected '<" + name + L">' tag");
+      unexpectedTag();
     }
   }
 }
@@ -504,7 +460,7 @@ TRXReader::procDefVars()
     }
     else
     {
-      parseError(L"Unexpected '<" + name + L">' tag");
+      unexpectedTag();
     }
   }
 }
@@ -550,7 +506,7 @@ TRXReader::procDefLists()
     }
     else
     {
-      parseError(L"Unexpected '<" + name + L">' tag");
+      unexpectedTag();
     }
   }
 }

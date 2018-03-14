@@ -140,7 +140,7 @@ Interchunk::read(string const &transferfile, string const &datafile)
   FILE *in = fopen(datafile.c_str(), "rb");
   if(!in)
   {
-    cerr << "Error: Could not open file '" << datafile << "'." << endl;
+    wcerr << "Error: Could not open file '" << datafile << "'." << endl;
     exit(EXIT_FAILURE);
   }
   readData(in);
@@ -155,7 +155,7 @@ Interchunk::readInterchunk(string const &in)
   
   if(doc == NULL)
   {
-    cerr << "Error: Could not parse file '" << in << "'." << endl;
+    wcerr << "Error: Could not parse file '" << in << "'." << endl;
     exit(EXIT_FAILURE);
   }
   
@@ -214,7 +214,16 @@ Interchunk::checkIndex(xmlNode *element, int index, int limit)
 {
   if(index >= limit)
   {
-    wcerr << L"Error in " << UtfConverter::fromUtf8((char *) doc->URL) <<L": line " << element->line << endl;
+    wcerr << L"Error in " << UtfConverter::fromUtf8((char *) doc->URL) << L": line " << element->line << L": index >= limit" << endl;
+    return false;
+  }
+  if(index < 0) {
+    wcerr << L"Error in " << UtfConverter::fromUtf8((char *) doc->URL) << L": line " << element->line << L": index < 0" << endl;
+    return false;
+  }
+  if(word[index] == 0)
+  {
+    wcerr << L"Error in " << UtfConverter::fromUtf8((char *) doc->URL) << L": line " << element->line << L": Null access at word[index]" << endl;
     return false;
   }
   return true;
@@ -259,12 +268,11 @@ Interchunk::evalString(xmlNode *element)
         return ti.getContent();
         
       case ti_b:
-        if(checkIndex(element, ti.getPos(), lblank))
+        if(ti.getPos() >= 0 && checkIndex(element, ti.getPos(), lblank))
         {
-          if(ti.getPos() >= 0)
-          {
-            return !blank?"":*(blank[ti.getPos()]);
-          }
+          return !blank?"":*(blank[ti.getPos()]);
+        }
+        else {
           return " ";
         }
         break;
@@ -386,7 +394,7 @@ Interchunk::evalString(xmlNode *element)
   }  
   else
   {
-    cerr << "Error: unexpected rvalue expression '" << element->name << "'" << endl;
+    wcerr << "Error: unexpected rvalue expression '" << element->name << "'" << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -1460,7 +1468,7 @@ Interchunk::interchunk(FILE *in, FILE *out)
           {
             wcerr << L" ";
           }
-          wcerr << *tmpword[ind];
+          fputws_unlocked(tmpword[ind]->c_str(), stderr);
         }
         wcerr << endl;
       }
@@ -1495,7 +1503,7 @@ Interchunk::interchunk(FILE *in, FILE *out)
 	break;
 
       default:
-	cerr << "Error: Unknown input token." << endl;
+	wcerr << "Error: Unknown input token." << endl;
 	return;
     }
   }

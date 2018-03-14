@@ -27,6 +27,10 @@
 #include <stack>
 #include <cerrno>
 
+#ifdef _WIN32
+#include <utf8_fwrap.h>
+#endif
+
 using namespace Apertium;
 using namespace std;
 
@@ -142,7 +146,7 @@ Transfer::readBil(string const &fstfile)
   FILE *in = fopen(fstfile.c_str(), "rb");
   if(!in)
   {
-    cerr << "Error: Could not open file '" << fstfile << "'." << endl;
+    wcerr << "Error: Could not open file '" << fstfile << "'." << endl;
     exit(EXIT_FAILURE);
   }
   fstp.load(in);
@@ -156,7 +160,7 @@ Transfer::setExtendedDictionary(string const &fstfile)
   FILE *in = fopen(fstfile.c_str(), "rb");
   if(!in)
   {
-    cerr << "Error: Could not open extended dictionary file '" << fstfile << "'." << endl;
+    wcerr << "Error: Could not open extended dictionary file '" << fstfile << "'." << endl;
     exit(EXIT_FAILURE);
   }
   extended.load(in);
@@ -175,7 +179,7 @@ Transfer::read(string const &transferfile, string const &datafile,
   FILE *in = fopen(datafile.c_str(), "rb");
   if(!in)
   {
-    cerr << "Error: Could not open file '" << datafile << "'." << endl;
+    wcerr << "Error: Could not open file '" << datafile << "'." << endl;
     exit(EXIT_FAILURE);
   }
   readData(in);
@@ -194,7 +198,7 @@ Transfer::readTransfer(string const &in)
 
   if(doc == NULL)
   {
-    cerr << "Error: Could not parse file '" << in << "'." << endl;
+    wcerr << "Error: Could not parse file '" << in << "'." << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -269,7 +273,16 @@ Transfer::checkIndex(xmlNode *element, int index, int limit)
 {
   if(index >= limit)
   {
-    wcerr << L"Error in " << UtfConverter::fromUtf8((char *) doc->URL) <<L": line " << element->line << endl;
+    wcerr << L"Error in " << UtfConverter::fromUtf8((char *) doc->URL) << L": line " << element->line << L": index >= limit" << endl;
+    return false;
+  }
+  if(index < 0) {
+    wcerr << L"Error in " << UtfConverter::fromUtf8((char *) doc->URL) << L": line " << element->line << L": index < 0" << endl;
+    return false;
+  }
+  if(word[index] == 0)
+  {
+    wcerr << L"Error in " << UtfConverter::fromUtf8((char *) doc->URL) << L": line " << element->line << L": Null access at word[index]" << endl;
     return false;
   }
   return true;
@@ -336,12 +349,11 @@ Transfer::evalString(xmlNode *element)
         return ti.getContent();
 
       case ti_b:
-        if(checkIndex(element, ti.getPos(), lblank))
+        if(ti.getPos() >= 0 && checkIndex(element, ti.getPos(), lblank))
         {
-          if(ti.getPos() >= 0)
-          {
-            return !blank?"":*(blank[ti.getPos()]);
-          }
+          return !blank?"":*(blank[ti.getPos()]);
+        }
+        else {
           return " ";
         }
         break;
@@ -583,7 +595,7 @@ Transfer::evalString(xmlNode *element)
   }
   else
   {
-    cerr << "Error: unexpected rvalue expression '" << element->name << "'" << endl;
+    wcerr << "Error: unexpected rvalue expression '" << element->name << "'" << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -680,7 +692,6 @@ Transfer::processChunk(xmlNode *localroot)
   string caseofchunk = "aa";
   string result;
 
-
   for(xmlAttr *i = localroot->properties; i != NULL; i = i->next)
   {
     if(!xmlStrcmp(i->name, (const xmlChar *) "name"))
@@ -710,7 +721,7 @@ Transfer::processChunk(xmlNode *localroot)
     }
     else
     {
-      cerr << "Error: you must specify either 'name' or 'namefrom' for the 'chunk' element" << endl;
+      wcerr << "Error: you must specify either 'name' or 'namefrom' for the 'chunk' element" << endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -726,7 +737,7 @@ Transfer::processChunk(xmlNode *localroot)
     }
     else
     {
-      cerr << "Error: you must specify either 'name' or 'namefrom' for the 'chunk' element" << endl;
+      wcerr << "Error: you must specify either 'name' or 'namefrom' for the 'chunk' element" << endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -917,11 +928,15 @@ Transfer::processLet(xmlNode *localroot)
         return;
 
       case ti_clip_sl:
-        word[ti.getPos()]->setSource(attr_items[ti.getContent()], evalString(rightSide), ti.getCondition());
+        if (checkIndex(leftSide, ti.getPos(), lword)) {
+          word[ti.getPos()]->setSource(attr_items[ti.getContent()], evalString(rightSide), ti.getCondition());
+        }
         return;
 
       case ti_clip_tl:
-        word[ti.getPos()]->setTarget(attr_items[ti.getContent()], evalString(rightSide), ti.getCondition());
+        if (checkIndex(leftSide, ti.getPos(), lword)) {
+          word[ti.getPos()]->setTarget(attr_items[ti.getContent()], evalString(rightSide), ti.getCondition());
+        }
         return;
 
       default:
@@ -965,6 +980,15 @@ Transfer::processLet(xmlNode *localroot)
       {
         as = i->children->content;
       }
+    }
+
+    if (pos >= lword) {
+      wcerr << L"Error: Transfer::processLet() bad access on pos >= lword" << endl;
+      return;
+    }
+    if (word[pos] == 0) {
+      wcerr << L"Error: Transfer::processLet() null access on word[pos]" << endl;
+      return;
     }
 
     if(!xmlStrcmp(side, (const xmlChar *) "tl"))
@@ -1092,13 +1116,14 @@ Transfer::processCallMacro(xmlNode *localroot)
       break;
     }
   }
-  
+
   // ToDo: Is it at all valid if npar <= 0 ?
 
   TransferWord **myword = NULL;
   if(npar > 0)
   {
     myword = new TransferWord *[npar];
+    std::fill(myword, myword+npar, (TransferWord *)(0));
   }
   string **myblank = NULL;
   if(npar > 0)
@@ -1113,6 +1138,10 @@ Transfer::processCallMacro(xmlNode *localroot)
   {
     if(i->type == XML_ELEMENT_NODE)
     {
+      if (idx >= npar) {
+      	  wcerr << L"Error: processCallMacro() number of arguments >= npar at line " << i->line << endl;
+      	  return;
+      }
       int pos = atoi((const char *) i->properties->children->content)-1;
       myword[idx] = word[pos];
       if(idx-1 >= 0)
@@ -1139,7 +1168,7 @@ Transfer::processCallMacro(xmlNode *localroot)
   swap(myword, word);
   swap(myblank, blank);
   swap(npar, lword);
-  
+
   delete[] myword;
   delete[] myblank;
 }
@@ -1898,10 +1927,10 @@ Transfer::transfer(FILE *in, FILE *out)
   {
     if(trace_att)
     {
-      cerr << "Loop start " << endl;
-      cerr << "ms.size: " << ms.size() << endl;
+      wcerr << "Loop start " << endl;
+      wcerr << "ms.size: " << ms.size() << endl;
 
-      cerr << "tmpword.size(): " << tmpword.size() << endl;
+      wcerr << "tmpword.size(): " << tmpword.size() << endl;
       for (unsigned int ind = 0; ind < tmpword.size(); ind++)
       {
         if(ind != 0)
@@ -1912,7 +1941,7 @@ Transfer::transfer(FILE *in, FILE *out)
       }
       wcerr << endl;
 
-      cerr << "tmpblank.size(): " << tmpblank.size() << endl;
+      wcerr << "tmpblank.size(): " << tmpblank.size() << endl;
       for (unsigned int ind = 0; ind < tmpblank.size(); ind++)
       {
         wcerr << L"'";
@@ -1921,8 +1950,8 @@ Transfer::transfer(FILE *in, FILE *out)
       }
       wcerr << endl;
 
-      cerr << "last: " << last << endl;
-      cerr << "prev_last: " << prev_last << endl << endl;
+      wcerr << "last: " << last << endl;
+      wcerr << "prev_last: " << prev_last << endl << endl;
     }
 
     if(ms.size() == 0)
@@ -1933,7 +1962,7 @@ Transfer::transfer(FILE *in, FILE *out)
 
         if(trace_att)
         {
-          cerr << "num_words_to_consume: " << num_words_to_consume << endl;
+          wcerr << "num_words_to_consume: " << num_words_to_consume << endl;
         }
 
         //Consume all the words from the input which matched the rule.
@@ -1980,7 +2009,7 @@ Transfer::transfer(FILE *in, FILE *out)
         {
           if(trace_att)
           {
-            cerr << "printing tmpword[0]" <<endl;
+            wcerr << "printing tmpword[0]" <<endl;
           }
 
           pair<wstring, int> tr;
@@ -2087,7 +2116,7 @@ Transfer::transfer(FILE *in, FILE *out)
 	{
           if(trace_att)
           {
-            cerr << "printing tmpblank[0]" <<endl;
+            wcerr << "printing tmpblank[0]" <<endl;
           }
           fputws_unlocked(tmpblank[0]->c_str(), output);
           tmpblank.clear();
@@ -2113,7 +2142,7 @@ Transfer::transfer(FILE *in, FILE *out)
           {
             wcerr << L" ";
           }
-          wcerr << *tmpword[ind];
+          fputws_unlocked(tmpword[ind]->c_str(), stderr);
         }
         wcerr << endl;
       }
@@ -2147,7 +2176,7 @@ Transfer::transfer(FILE *in, FILE *out)
 	break;
 
       default:
-	cerr << "Error: Unknown input token." << endl;
+	wcerr << "Error: Unknown input token." << endl;
 	return;
     }
   }
@@ -2165,6 +2194,7 @@ Transfer::applyRule()
     if(i == 0)
     {
       word = new TransferWord *[limit];
+      std::fill(word, word+limit, (TransferWord *)(0));
       lword = limit;
       if(limit != 1)
       {
@@ -2250,6 +2280,7 @@ Transfer::applyRule()
     for(unsigned int i = 0; i != limit; i++)
     {
       delete word[i];
+      word[i] = 0; // ToDo: That this changes things means there are much bigger problems elsewhere
     }
     delete[] word;
   }
@@ -2258,6 +2289,7 @@ Transfer::applyRule()
     for(unsigned int i = 0; i != limit - 1; i++)
     {
       delete blank[i];
+      blank[i] = 0;
     }
     delete[] blank;
   }

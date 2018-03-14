@@ -136,6 +136,7 @@ patterns used in rules
 <!ATTLIST def-macro n ID #REQUIRED>
 <!ATTLIST def-macro npar CDATA #REQUIRED
                     c CDATA #IMPLIED>
+<!ATTLIST def-macro comment CDATA #IMPLIED>
 <!-- 
      Macro definition:
      
@@ -150,10 +151,12 @@ patterns used in rules
 
 <!ELEMENT rule (pattern, action)>
 <!ATTLIST rule comment CDATA #IMPLIED>
-<!-- 
-      Each rule has a pattern and an action 
+<!ATTLIST rule c CDATA #IMPLIED>
+<!--
+      Each rule has a pattern and an action
       * attribute 'comment' allows to put in comments about the purpose of
-        the rule being defined
+        the rule being defined, this may be a rule specification in machine readable form
+      * attribute 'c' is for further comments in free form
 -->
 
 <!ELEMENT pattern (pattern-item+)>

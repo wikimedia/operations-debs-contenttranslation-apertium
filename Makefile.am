@@ -1,5 +1,7 @@
-SUBDIRS = $(GENERIC_LIBRARY_NAME)
-DIST_SUBDIRS = $(GENERIC_LIBRARY_NAME)
+ACLOCAL_AMFLAGS=-I m4
+
+SUBDIRS = $(GENERIC_LIBRARY_NAME) tests
+DIST_SUBDIRS = $(GENERIC_LIBRARY_NAME) tests
 
 modesdir=$(prefix)/share/apertium/modes
 
@@ -14,3 +16,6 @@ EXTRA_DIST=autogen.sh README-MODES apertium.m4
 install-data-local:
 	mkdir -p $(DESTDIR)$(modesdir)
 	$(INSTALL_DATA) README-MODES  $(DESTDIR)$(modesdir)/README
+
+# just a synonym:
+test: check

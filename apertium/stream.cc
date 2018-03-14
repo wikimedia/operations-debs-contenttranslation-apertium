@@ -58,6 +58,7 @@ StreamedType Stream::get() {
   std::wstring Lemma;
   private_flush_ = false;
 
+  //TheCharacterStream.clear();
   if (!is_eof_throw_if_not_TheCharacterStream_good()) {
     while (true) {
       const wchar_t Character_ = TheCharacterStream.get();
@@ -140,10 +141,9 @@ StreamedType Stream::get() {
       case L'/':
         if (!ThePreviousCase) {
           std::wstringstream Message;
-          Message
-              << L"unexpected '" << Character_
-              << L"', '/' expected to follow '[', to follow '>' immediately, "
-                 L"or to follow '^' or '#' not immediately";
+          Message << L"unexpected '" << Character_
+                  << L"', '/' expected to follow '[', to follow '>' "
+                     L"immediately, or to follow '^' or '#' not immediately";
           throw wchar_t_Exception::Stream::UnexpectedCase(
               Message_what(Message));
         }
@@ -238,6 +238,7 @@ StreamedType Stream::get() {
 
           break;
         case L'#':
+
           if (ThePreviousCase->isPreviousCharacter) {
             std::wstringstream Message;
             Message << L"unexpected '" << Character_
@@ -274,11 +275,10 @@ StreamedType Stream::get() {
             break;
           default:
             std::wstringstream Message;
-            Message
-                << L"unexpected '" << Character_ << L"' following '"
-                << ThePreviousCase->ThePreviousCase
-                << L"', '*' expected to follow '[', ']', or '$' or to follow "
-                   L"'/' immediately";
+            Message << L"unexpected '" << Character_ << L"' following '"
+                    << ThePreviousCase->ThePreviousCase
+                    << L"', '*' expected to follow '[', ']', or '$' or to "
+                       L"follow '/' immediately";
             throw wchar_t_Exception::Stream::UnexpectedCase(
                 Message_what(Message));
           }
@@ -289,10 +289,10 @@ StreamedType Stream::get() {
       case L'<':
         if (!ThePreviousCase) {
           std::wstringstream Message;
-          Message
-              << L"unexpected '" << Character_
-              << L"', '<' expected to follow '[', to follow '>' immediately, "
-                 L"or to follow '#', '/' or '+' not immediately";
+          Message << L"unexpected '" << Character_
+                  << L"', '<' expected to follow '[', to follow '>' "
+                     L"immediately, or to follow '#', '/' or '+' not "
+                     L"immediately";
           throw wchar_t_Exception::Stream::UnexpectedCase(
               Message_what(Message));
         }
@@ -303,14 +303,16 @@ StreamedType Stream::get() {
           continue;
         case L'/':
         case L'#':
+          //std::wcerr << L"[306] Character: " << Character_ << L"||| Lemma: " << Lemma << std::endl ; 
         case L'+':
           if (ThePreviousCase->isPreviousCharacter) {
             std::wstringstream Message;
-            Message
-                << L"unexpected '" << Character_ << L"' immediately following '"
-                << ThePreviousCase->ThePreviousCase
-                << L"', '<' expected to follow '[', to follow '>' immediately, "
-                   L"or to follow '#', '/' or '+' not immediately";
+            Message << L"unexpected '" << Character_
+                    << L"' immediately following '"
+                    << ThePreviousCase->ThePreviousCase
+                    << L"', '<' expected to follow '[', to follow '>' "
+                       L"immediately, or to follow '#', '/' or '+' not "
+                       L"immediately";
             throw wchar_t_Exception::Stream::UnexpectedCase(
                 Message_what(Message));
           }
@@ -319,12 +321,12 @@ StreamedType Stream::get() {
         case L'>':
           if (!ThePreviousCase->isPreviousCharacter) {
             std::wstringstream Message;
-            Message
-                << L"unexpected '" << Character_
-                << L"' not immediately following '"
-                << ThePreviousCase->ThePreviousCase
-                << L"', '<' expected to follow '[', to follow '>' immediately, "
-                   L"or to follow '#', '/' or '+' not immediately";
+            Message << L"unexpected '" << Character_
+                    << L"' not immediately following '"
+                    << ThePreviousCase->ThePreviousCase
+                    << L"', '<' expected to follow '[', to follow '>' "
+                       L"immediately, or to follow '#', '/' or '+' not "
+                       L"immediately";
             throw wchar_t_Exception::Stream::UnexpectedCase(
                 Message_what(Message));
           }
@@ -332,11 +334,11 @@ StreamedType Stream::get() {
           break;
         default:
           std::wstringstream Message;
-          Message
-              << L"unexpected '" << Character_ << L"' following '"
-              << ThePreviousCase->ThePreviousCase
-              << L"', '<' expected to follow '[', to follow '>' immediately, "
-                 L"or to follow '#', '/' or '+' not immediately";
+          Message << L"unexpected '" << Character_ << L"' following '"
+                  << ThePreviousCase->ThePreviousCase
+                  << L"', '<' expected to follow '[', to follow '>' "
+                     L"immediately, or to follow '#', '/' or '+' not "
+                     L"immediately";
           throw wchar_t_Exception::Stream::UnexpectedCase(
               Message_what(Message));
         }
@@ -350,9 +352,8 @@ StreamedType Stream::get() {
         if (!ThePreviousCase) {
           std::wstringstream Message;
           Message << L"unexpected '" << Character_
-                  << L"', '>' expected to "
-                     L"follow '[' or to follow "
-                     L"'<' not immediately";
+                  << L"', '>' expected to follow '[' or to follow '<' not "
+                     L"immediately";
           throw wchar_t_Exception::Stream::UnexpectedCase(
               Message_what(Message));
         }
@@ -367,9 +368,8 @@ StreamedType Stream::get() {
             Message << L"unexpected '" << Character_
                     << L"' immediately following '"
                     << ThePreviousCase->ThePreviousCase
-                    << L"', '>' expected to "
-                       L"follow '[' or to follow "
-                       L"'<' not immediately";
+                    << L"', '>' expected to follow '[' or to follow '<' not "
+                       L"immediately";
             throw wchar_t_Exception::Stream::UnexpectedCase(
                 Message_what(Message));
           }
@@ -380,31 +380,32 @@ StreamedType Stream::get() {
           std::wstringstream Message;
           Message << L"unexpected '" << Character_ << L"' following '"
                   << ThePreviousCase->ThePreviousCase
-                  << L"', '>' expected to "
-                     L"follow '[' or to follow "
-                     L"'<' not immediately";
+                  << L"', '>' expected to follow '[' or to follow '<' not "
+                     L"immediately";
           throw wchar_t_Exception::Stream::UnexpectedCase(
               Message_what(Message));
         }
 
         std::abort();
       case L'#':
+        //std::wcerr << L"[391] Character: " << Character_ << L"||| Lemma: " << Lemma << std::endl ; 
         if (ThePreviousCase) {
           switch (ThePreviousCase->ThePreviousCase) {
           case L'[':
           case L']':
+          case L'^':
           case L'$':
             push_back_Character(TheStreamedType, Lemma, Character_);
             continue;
           case L'/':
             if (ThePreviousCase->isPreviousCharacter) {
               std::wstringstream Message;
-              Message
-                  << L"unexpected '" << Character_
-                  << L"' immediately following '"
-                  << ThePreviousCase->ThePreviousCase
-                  << L"', '#' expected to follow '[', ']', or '$', to follow "
-                     L"'>' immediately, or to follow '/' not immediately";
+              Message << L"unexpected '" << Character_
+                      << L"' immediately following '"
+                      << ThePreviousCase->ThePreviousCase
+                      << L"', '#' expected to follow '[', ']', or '$', to "
+                         L"follow '>' immediately, or to follow '/' not "
+                         L"immediately";
               throw wchar_t_Exception::Stream::UnexpectedCase(
                   Message_what(Message));
             }
@@ -413,12 +414,12 @@ StreamedType Stream::get() {
           case L'>':
             if (!ThePreviousCase->isPreviousCharacter) {
               std::wstringstream Message;
-              Message
-                  << L"unexpected '" << Character_
-                  << L"' not immediately following '"
-                  << ThePreviousCase->ThePreviousCase
-                  << L"', '#' expected to follow '[', ']', or '$', to follow "
-                     L"'>' immediately, or to follow '/' not immediately";
+              Message << L"unexpected '" << Character_
+                      << L"' not immediately following '"
+                      << ThePreviousCase->ThePreviousCase
+                      << L"', '#' expected to follow '[', ']', or '$', to "
+                         L"follow '>' immediately, or to follow '/' not "
+                         L"immediately";
               throw wchar_t_Exception::Stream::UnexpectedCase(
                   Message_what(Message));
             }
@@ -435,6 +436,8 @@ StreamedType Stream::get() {
           }
 
           ThePreviousCase = PreviousCaseType(Character_);
+          push_back_Character(TheStreamedType, Lemma, Character_);
+          //std::wcerr << L"[440] Character: " << Character_ << L"||| Lemma: " << Lemma << std::endl ; 
           continue;
         }
 
@@ -445,19 +448,20 @@ StreamedType Stream::get() {
           switch (ThePreviousCase->ThePreviousCase) {
           case L'[':
           case L']':
+          case L'^':
+          case L'/':
           case L'$':
             push_back_Character(TheStreamedType, Lemma, Character_);
             continue;
           case L'>':
             if (!ThePreviousCase->isPreviousCharacter) {
               std::wstringstream Message;
-              Message
-                  << L"unexpected '" << Character_
-                  << L"' not immediately following '"
-                  << ThePreviousCase->ThePreviousCase
-                  << L"', '+' expected to follow '[', ']', or '$', to follow "
-                     L"'>' "
-                     L"immediately, or to follow '#' not immediately";
+              Message << L"unexpected '" << Character_
+                      << L"' not immediately following '"
+                      << ThePreviousCase->ThePreviousCase
+                      << L"', '+' expected to follow '[', ']', '^', '/' or "
+                         L"'$', to follow '>' immediately, or to follow '#' "
+                         L"not immediately";
               throw wchar_t_Exception::Stream::UnexpectedCase(
                   Message_what(Message));
             }
@@ -466,13 +470,12 @@ StreamedType Stream::get() {
           case L'#':
             if (ThePreviousCase->isPreviousCharacter) {
               std::wstringstream Message;
-              Message
-                  << L"unexpected '" << Character_
-                  << L"' immediately following '"
-                  << ThePreviousCase->ThePreviousCase
-                  << L"', '+' expected to follow '[', ']', or '$', to follow "
-                     L"'>' "
-                     L"immediately, or to follow '#' not immediately";
+              Message << L"unexpected '" << Character_
+                      << L"' immediately following '"
+                      << ThePreviousCase->ThePreviousCase
+                      << L"', '+' expected to follow '[', ']', or '$', to "
+                         L"follow '>' immediately, or to follow '#' not "
+                         L"immediately";
               throw wchar_t_Exception::Stream::UnexpectedCase(
                   Message_what(Message));
             }
@@ -500,10 +503,9 @@ StreamedType Stream::get() {
       case L'$':
         if (!ThePreviousCase) {
           std::wstringstream Message;
-          Message
-              << L"unexpected '" << Character_
-              << L"', '$' expected to follow '[', to follow '>' immediately, "
-                 L"or to follow '*' or '#' not immediately";
+          Message << L"unexpected '" << Character_
+                  << L"', '$' expected to follow '[', to follow '>' "
+                     L"immediately, or to follow '*' or '#' not immediately";
           throw wchar_t_Exception::Stream::UnexpectedCase(
               Message_what(Message));
         }
@@ -515,11 +517,11 @@ StreamedType Stream::get() {
         case L'*':
           if (ThePreviousCase->isPreviousCharacter) {
             std::wstringstream Message;
-            Message
-                << L"unexpected '" << Character_ << L"' immediately following '"
-                << ThePreviousCase->ThePreviousCase
-                << L"', '$' expected to follow '[', to follow '>' immediately, "
-                   L"or to follow '*' or '#' not immediately";
+            Message << L"unexpected '" << Character_
+                    << L"' immediately following '"
+                    << ThePreviousCase->ThePreviousCase
+                    << L"', '$' expected to follow '[', to follow '>' "
+                       L"immediately, or to follow '*' or '#' not immediately";
             throw wchar_t_Exception::Stream::UnexpectedCase(
                 Message_what(Message));
           }
@@ -537,12 +539,11 @@ StreamedType Stream::get() {
         case L'>':
           if (!ThePreviousCase->isPreviousCharacter) {
             std::wstringstream Message;
-            Message
-                << L"unexpected '" << Character_
-                << L"' not immediately following '"
-                << ThePreviousCase->ThePreviousCase
-                << L"', '$' expected to follow '[', to follow '>' immediately, "
-                   L"or to follow '*' or '#' not immediately";
+            Message << L"unexpected '" << Character_
+                    << L"' not immediately following '"
+                    << ThePreviousCase->ThePreviousCase
+                    << L"', '$' expected to follow '[', to follow '>' "
+                       L"immediately, or to follow '*' or '#' not immediately";
             throw wchar_t_Exception::Stream::UnexpectedCase(
                 Message_what(Message));
           }
@@ -551,11 +552,11 @@ StreamedType Stream::get() {
         case L'#':
           if (ThePreviousCase->isPreviousCharacter) {
             std::wstringstream Message;
-            Message
-                << L"unexpected '" << Character_ << L"' immediately following '"
-                << ThePreviousCase->ThePreviousCase
-                << L"', '$' expected to follow '[', to follow '>' immediately, "
-                   L"or to follow '*' or '#' not immediately";
+            Message << L"unexpected '" << Character_
+                    << L"' immediately following '"
+                    << ThePreviousCase->ThePreviousCase
+                    << L"', '$' expected to follow '[', to follow '>' "
+                       L"immediately, or to follow '*' or '#' not immediately";
             throw wchar_t_Exception::Stream::UnexpectedCase(
                 Message_what(Message));
           }
@@ -563,11 +564,10 @@ StreamedType Stream::get() {
           break;
         default:
           std::wstringstream Message;
-          Message
-              << L"unexpected '" << Character_ << L"' following '"
-              << ThePreviousCase->ThePreviousCase
-              << L"', '$' expected to follow '[', to follow '>' immediately, "
-                 L"or to follow '*' or '#' not immediately";
+          Message << L"unexpected '" << Character_ << L"' following '"
+                  << ThePreviousCase->ThePreviousCase
+                  << L"', '$' expected to follow '[', to follow '>' "
+                     L"immediately, or to follow '*' or '#' not immediately";
           throw wchar_t_Exception::Stream::UnexpectedCase(
               Message_what(Message));
         }
@@ -613,8 +613,7 @@ StreamedType Stream::get() {
       std::wstringstream Message;
       Message << L"unexpected end-of-file following '"
               << ThePreviousCase->ThePreviousCase
-              << L"', end-of-file expected to follow ']' "
-                 L"or '$'";
+              << L"', end-of-file expected to follow ']' or '$'";
       throw wchar_t_Exception::Stream::UnexpectedEndOfFile(
           Message_what(Message));
     }
@@ -623,7 +622,70 @@ StreamedType Stream::get() {
   return TheStreamedType;
 }
 
+StreamedType Stream::peek() {
+  bool prev_flush = private_flush_;
+  std::ios::iostate state = TheCharacterStream.rdstate();
+  int pos = TheCharacterStream.tellg();
+
+  StreamedType token = get();
+
+  TheCharacterStream.clear(state);
+  TheCharacterStream.seekg(pos);
+  private_flush_ = prev_flush;
+  return token;
+}
+
+bool Stream::peekIsBlank() {
+  std::ios::iostate state = TheCharacterStream.rdstate();
+  int pos = TheCharacterStream.tellg();
+
+  const wchar_t newline1 = TheCharacterStream.get();
+  const wchar_t newline2 = TheCharacterStream.get();
+
+  TheCharacterStream.clear(state);
+  TheCharacterStream.seekg(pos);
+
+  return newline1 == L'\n' && newline2 == L'\n';
+}
+
 bool Stream::flush_() const { return private_flush_; }
+
+void Stream::outputLexicalUnit(
+    const LexicalUnit &lexical_unit, const Optional<Analysis> analysis,
+    std::wostream &output, const basic_Tagger::Flags &flags) {
+  using namespace std::rel_ops;
+  output << L"^";
+
+  if (lexical_unit.TheAnalyses.empty() || !analysis) {
+    if (flags.getShowSuperficial())
+      output << lexical_unit.TheSurfaceForm << L"/";
+
+    output << L"*" << lexical_unit.TheSurfaceForm << L"$";
+    return;
+  }
+
+  if (flags.getMark()) {
+    if (lexical_unit.TheAnalyses.size() != 1)
+      output << L"=";
+  }
+
+  if (flags.getShowSuperficial())
+    output << lexical_unit.TheSurfaceForm << L"/";
+
+  output << *analysis;
+
+  if (flags.getFirst()) {
+    for (std::vector<Analysis>::const_iterator other_analysis =
+             lexical_unit.TheAnalyses.begin();
+         // Call .end() each iteration to save memory.
+         other_analysis != lexical_unit.TheAnalyses.end(); ++other_analysis) {
+      if (*other_analysis != *analysis)
+        output << L"/" << *other_analysis;
+    }
+  }
+
+  output << L"$";
+}
 
 Stream::PreviousCaseType::PreviousCaseType(const wchar_t &PreviousCase_)
     : ThePreviousCase(PreviousCase_), isPreviousCharacter(true) {}
@@ -633,6 +695,10 @@ bool Stream::is_eof_throw_if_not_TheCharacterStream_good() const {
     return true;
 
   if (!TheCharacterStream) {
+    std::wcerr << L"State bad " << TheCharacterStream.good() << " "
+                                << TheCharacterStream.eof() << " "
+                                << TheCharacterStream.fail() << " "
+                                << TheCharacterStream.bad() << "\n";
     std::wstringstream Message;
     Message << L"can't get const wchar_t: TheCharacterStream not good";
     throw wchar_t_Exception::Stream::TheCharacterStream_not_good(
