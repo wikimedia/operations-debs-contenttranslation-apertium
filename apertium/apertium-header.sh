@@ -1,3 +1,4 @@
+#!/bin/bash
 # -*- sh-basic-offset: 2 -*-
 
 # Copyright (C) 2005 Universitat d'Alacant / Universidad de Alicante
@@ -18,10 +19,10 @@
 
 message ()
 {
-  echo "USAGE: $(basename $0) [-d datadir] [-f format] [-u] <direction> [in [out]]"
+  echo "USAGE: $(basename "$0") [-d datadir] [-f format] [-u] <direction> [in [out]]"
   echo " -d datadir       directory of linguistic data"
   echo " -f format        one of: txt (default), html, rtf, odt, docx, wxml, xlsx, pptx,"
-  echo "                  xpresstag, html-noent, latex, latex-raw"
+  echo "                  xpresstag, html-noent, latex, latex-raw, line"
   echo " -a               display ambiguity"
   echo " -u               don't display marks '*' for unknown words"
   echo " -n               don't insert period before possible sentence-ends"
@@ -44,19 +45,21 @@ list_directions ()
 
 locale_utf8 ()
 {
-  export LC_CTYPE=$(locale -a|grep -i "utf[.]*8"|head -1);
-  if [ LC_CTYPE = "" ]; then
-    echo "Error: Install an UTF-8 locale in your system";
-    exit 1;
+  export LC_CTYPE
+  LC_CTYPE=$(locale -a|grep -i "utf[.-]*8"|head -1)
+  if [[ -z ${LC_CTYPE} ]]; then
+    echo "Error: Install an UTF-8 locale in your system"
+    exit 1
   fi
 }
 
-locale_latin1 ()
-{
-  export LC_CTYPE=$(locale -a|grep -i -e "8859-1" -e "@euro"|head -1);
-  if [ LC_CTYPE = "" ]; then
-    echo "Error: Install a Latin-1 locale in your system";
-    exit 1;
+check_encoding () {
+  local file=$1
+  local encoding
+  encoding=$(file -b --mime-encoding "${file}")
+  if [[ "${encoding}" != utf-8 && "${encoding}" != us-ascii ]]; then
+    echo "Input seems to be non-UTF-8, please convert to UTF-8 (e.g. with 'iconv -f ${encoding} -t utf-8')" >&2
+    exit 1
   fi
 }
 
@@ -87,17 +90,15 @@ translate_latex()
 {
   test_gawk
 
-  if [ "$INFILE" = ""  -o "$INFILE" = /dev/stdin ]; then
+  if [[ -z "$INFILE" || "$INFILE" = /dev/stdin ]]; then
     INFILE=$(mktemp "$TMPDIR/apertium.XXXXXXXX")
     cat > "$INFILE"
     BORRAFICHERO="true"
   fi
+  check_encoding "${INFILE}"
+  locale_utf8
 
-  if [ "$(file -b --mime-encoding "$INFILE")" == "utf-8" ]; then
-    locale_latin1
-  else locale_utf8
-  fi
-
+  set -o pipefail
   "$APERTIUM_PATH/apertium-prelatex" "$INFILE" | \
     "$APERTIUM_PATH/apertium-utils-fixlatex" | \
     "$APERTIUM_PATH/apertium-deslatex" ${FORMAT_OPTIONS} | \
@@ -118,36 +119,12 @@ translate_latex()
     fi
 }
 
-
+# TODO: What was the intended difference between this and
+# translate_latex? They were identical, apart from one not cleaning up
+# tmp files
 translate_latex_raw()
 {
-  test_gawk
-
-  if [ "$INFILE" = "" -o "$INFILE" = /dev/stdin ]; then
-    INFILE=$(mktemp "$TMPDIR/apertium.XXXXXXXX")
-    cat > "$INFILE"
-    BORRAFICHERO="true"
-  fi
-
-  if [ "$(file -b --mime-encoding "$INFILE")" = "utf-8" ]; then
-    locale_latin1
-  else locale_utf8
-  fi
-
-  "$APERTIUM_PATH/apertium-prelatex" "$INFILE" | \
-    "$APERTIUM_PATH/apertium-utils-fixlatex" | \
-    "$APERTIUM_PATH/apertium-deslatex" ${FORMAT_OPTIONS} | \
-    if [ "$TRANSLATION_MEMORY_FILE" = "" ];
-    then cat;
-    else "$APERTIUM_PATH/lt-tmxproc" "$TMCOMPFILE";
-    fi | \
-      if [ ! -x "$DATADIR/modes/$PAIR.mode" ]; then
-      sh "$DATADIR/modes/$PAIR.mode" "$OPTION" "$OPTION_TAGGER"
-    else "$DATADIR/modes/$PAIR.mode" "$OPTION" "$OPTION_TAGGER"
-    fi | \
-      "$APERTIUM_PATH/apertium-relatex"| \
-      awk '{gsub("</CONTENTS-noeos>", "</CONTENTS>"); print;}' | \
-      if [ "$REDIR" == "" ]; then "$APERTIUM_PATH/apertium-postlatex-raw"; else "$APERTIUM_PATH/apertium-postlatex-raw" > "$SALIDA"; fi
+  translate_latex
 }
 
 
@@ -192,7 +169,6 @@ translate_odt ()
 
   if [ "$REDIR" == "" ]; then cat "$OTRASALIDA"; else cat "$OTRASALIDA" > "$SALIDA"; fi
   rm -Rf "$OTRASALIDA"
-  rm -Rf "$TMCOMPFILE"
 }
 
 translate_docx ()
@@ -249,7 +225,6 @@ translate_docx ()
 
   if [ "$REDIR" == "" ]; then cat "$OTRASALIDA"; else cat "$OTRASALIDA" > "$SALIDA"; fi
   rm -Rf "$OTRASALIDA"
-  rm -Rf "$TMCOMPFILE"
 }
 
 translate_pptx ()
@@ -306,7 +281,6 @@ translate_pptx ()
 
   if [ "$REDIR" == "" ]; then cat "$OTRASALIDA"; else cat "$OTRASALIDA" > "$SALIDA"; fi
   rm -Rf "$OTRASALIDA"
-  rm -Rf "$TMCOMPFILE"
 }
 
 
@@ -350,26 +324,46 @@ translate_xlsx ()
 
   if [ "$REDIR" == "" ]; then cat "$OTRASALIDA"; else cat "$OTRASALIDA" > "$SALIDA"; fi
   rm -Rf "$OTRASALIDA"
-  rm -Rf "$TMCOMPFILE"
 }
 
 translate_htmlnoent ()
 {
   "$APERTIUM_PATH/apertium-deshtml" ${FORMAT_OPTIONS} "$INFILE" | \
-    if [ "$TRANSLATION_MEMORY_FILE" = "" ]; then
-    cat
-  else "$APERTIUM_PATH/lt-tmxproc" "$TMCOMPFILE";
-  fi | if [ ! -x "$DATADIR/modes/$PAIR.mode" ]; then
-    sh "$DATADIR/modes/$PAIR.mode" "$OPTION" "$OPTION_TAGGER"
+      if [ "$TRANSLATION_MEMORY_FILE" = "" ]; then
+          cat
+      else "$APERTIUM_PATH/lt-tmxproc" "$TMCOMPFILE";
+      fi | if [ ! -x "$DATADIR/modes/$PAIR.mode" ]; then
+      sh "$DATADIR/modes/$PAIR.mode" "$OPTION" "$OPTION_TAGGER"
   else "$DATADIR/modes/$PAIR.mode" "$OPTION" "$OPTION_TAGGER"
   fi | if [ "$FORMAT" = "none" ]; then
-    if [ "$REDIR" == "" ]; then cat; else cat > "$SALIDA"; fi
-  else if [ "$REDIR" == "" ]; then "$APERTIUM_PATH/apertium-rehtml-noent"; else "$APERTIUM_PATH/apertium-rehtml-noent" > "$SALIDA"; fi
+      if [ "$REDIR" == "" ]; then cat; else cat > "$SALIDA"; fi
+  else
+    if [ "$REDIR" == "" ]; then "$APERTIUM_PATH/apertium-rehtml-noent"; else "$APERTIUM_PATH/apertium-rehtml-noent" > "$SALIDA"; fi
   fi
-
-  rm -Rf "$TMCOMPFILE"
 }
 
+translate_line ()
+{
+  # TODO: lt-proc inserts spaces before parts of mwe's that cross
+  # lines, even though the parts get output as individual lu's
+  "$APERTIUM_PATH/apertium-destxt" -n "$INFILE" | \
+      sed 's/[[:space:]]*\[$/[][/' |\
+      if [ "$TRANSLATION_MEMORY_FILE" = "" ]; then
+          cat
+      else
+        "$APERTIUM_PATH/lt-tmxproc" "$TMCOMPFILE";
+      fi | \
+          if [ ! -x "$DATADIR/modes/$PAIR.mode" ]; then
+              sh "$DATADIR/modes/$PAIR.mode" "$OPTION" "$OPTION_TAGGER"
+          else
+            "$DATADIR/modes/$PAIR.mode" "$OPTION" "$OPTION_TAGGER"
+          fi | \
+              if [ "$REDIR" == "" ]; then
+                  "$APERTIUM_PATH/apertium-retxt"
+              else
+                  "$APERTIUM_PATH/apertium-retxt" > "$SALIDA"
+              fi
+}
 
 
 
@@ -392,10 +386,11 @@ LIST_MODES_AND_EXIT=false
 FORMAT_OPTIONS=""
 
 # Skip (but store) non-option arguments that come before options:
-declare -a ARGS_PREOPT
+declare -a ARGS_PREOPT ARGS_ALL
 declare -i OPTIND=1
+ARGS_ALL=( $@ )              # so we can index into it with a variable
 while [[ $OPTIND -le $# ]]; do
-  arg=${@:$OPTIND:1}
+  arg=${ARGS_ALL[$OPTIND-1]}
   case $arg in
     -*) break ;;
     *) ARGS_PREOPT+=($arg); (( OPTIND++ )) ;;
@@ -414,11 +409,11 @@ while getopts ":uahlf:d:m:o:n" opt; do
     a) OPTION_TAGGER="-m" ;;
     l) LIST_MODES_AND_EXIT=true ;;
     h) message ;;
-    \?) echo "ERROR: Unknown option $OPTARG"; message ;;
-    :) echo "ERROR: $OPTARG requires an argument"; message ;;
+    \?) echo "ERROR: Unknown option $OPTARG" >&2; message >&2 ;;
+    :) echo "ERROR: $OPTARG requires an argument" >&2; message >&2 ;;
   esac
 done
-shift $(($OPTIND-1))
+shift $(( OPTIND-1 ))
 
 if $LIST_MODES_AND_EXIT; then list_directions; exit 0; fi
 
@@ -432,39 +427,38 @@ case "$#" in
     INFILE=$2
     PAIR=$1
     if [[ ! -e "$INFILE" ]]; then
-      echo "Error: file '$INFILE' not found."
-      message
+      echo "Error: file '$INFILE' not found." >&2
+      message >&2
     fi
     ;;
   2)
     INFILE=$2
     PAIR=$1
     if [[ ! -e "$INFILE" ]]; then
-      echo "Error: file '$INFILE' not found."
-      message
+      echo "Error: file '$INFILE' not found." >&2
+      message >&2
     fi
     ;;
   1)
     PAIR=$1
     ;;
   *)
-    message
+    message >&2
     ;;
 esac
 
 
 if [[ -n $TRANSLATION_MEMORY_FILE ]]; then
-  "$APERTIUM_PATH/lt-tmxcomp" "$TRANSLATION_MEMORY_DIRECTION" "$TRANSLATION_MEMORY_FILE" "$TMCOMPFILE" >/dev/null
-  if [ "$?" != "0" ]; then
-    echo "Error: Cannot compile TM '$TRANSLATION_MEMORY_FILE'"
-    echo"   hint: use -o parameter"
-    message
+  if ! "$APERTIUM_PATH/lt-tmxcomp" "$TRANSLATION_MEMORY_DIRECTION" "$TRANSLATION_MEMORY_FILE" "$TMCOMPFILE" >/dev/null; then
+    echo "Error: Cannot compile TM '$TRANSLATION_MEMORY_FILE'" >&2
+    echo"   hint: use -o parameter" >&2
+    message >&2
   fi
 fi
 
 if [[ ! -d "$DATADIR/modes" ]]; then
-  echo "Error: Directory '$DATADIR/modes' does not exist."
-  message
+  echo "Error: Directory '$DATADIR/modes' does not exist." >&2
+  message >&2
 fi
 
 if [[ ! -e "$DATADIR/modes/$PAIR.mode" ]]; then
@@ -524,6 +518,13 @@ case "$FORMAT" in
     else OPTION="-g";
     fi;
     translate_latex_raw
+    exit 0
+    ;;
+  line)
+    if [ "$UWORDS" = "no" ]; then OPTION="-n";
+    else OPTION="-g";
+    fi;
+    translate_line
     exit 0
     ;;
   

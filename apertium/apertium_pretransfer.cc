@@ -19,7 +19,7 @@
 #include <iostream>
 #include <libgen.h>
 #include <string>
-#include <getopt.h>
+#include "getopt_long.h"
 
 #include <lttoolbox/lt_locale.h>
 #include "apertium_config.h"
@@ -181,6 +181,10 @@ void processStream(FILE *input, FILE *output, bool null_flush, bool surface_form
 void usage(char *progname)
 {
   wcerr << L"USAGE: " << basename(progname) << L" [input_file [output_file]]" << endl;
+  wcerr << L"  -n         assume no surface forms" << endl;
+  wcerr << L"  -e         treat ~ as compound separator" << endl;
+  wcerr << L"  -z         null-flushing output on '\0'" << endl;
+  wcerr << L"  -h         shows this message" << endl;
   exit(EXIT_FAILURE);
 }
 
@@ -193,12 +197,9 @@ int main(int argc, char *argv[])
   bool null_flush = false;
   bool surface_forms = false;
   
-#if HAVE_GETOPT_LONG
   int option_index=0;
-#endif
 
   while (true) {
-#if HAVE_GETOPT_LONG
     static struct option long_options[] =
     {
       {"null-flush", no_argument, 0, 'z'},
@@ -209,9 +210,6 @@ int main(int argc, char *argv[])
     };
 
     int c=getopt_long(argc, argv, "enzh", long_options, &option_index);
-#else
-    int c=getopt(argc, argv, "enzh");
-#endif
     if (c==-1)
       break;
       

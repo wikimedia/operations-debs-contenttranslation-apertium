@@ -1,0 +1,92 @@
+#+STARTUP: showall
+
+#+CAPTION: Build Status
+[[https://travis-ci.org/unhammer/apertium-get][https://travis-ci.org/unhammer/apertium-get.svg]]
+
+* apertium-get
+
+  This is a little script to quickly get an Apertium language pair
+  (with its monolingual dependencies) set up for development. It's
+  meant for developers and people interested in hacking on the
+  language data; if you just want to run the newest translators you
+  should use the [[http://wiki.apertium.org/wiki/Installation][nightly repositories]].
+
+** Prerequisites
+
+   You'll need the newest Apertium development dependencies installed
+   first, follow the "Prerequisites" step at
+   http://wiki.apertium.org/wiki/Installation but just skip installing
+   any language data in the "Minimal installation from SVN" step –
+   that's what this script handles.
+
+   This should give you the "core tools", ie.:
+   - apertium
+   - lttoolbox
+   - apertium-lex-tools
+   - vislcg3
+   - hfst
+
+   Not all language pairs depend on all the core tools, but since you
+   can get core tools from the nightly repos, it's easiest to just get
+   them all at once.
+
+** Usage
+
+   Assuming you have the core tools installed, you can get the pair
+   "fie-bar" along with its data dependencies apertium-fie and
+   apertium-bar downloaded and compiled by simply doing
+
+   #+BEGIN_SRC sh
+   wget https://raw.githubusercontent.com/unhammer/apertium-get/master/apertium-get
+   chmod +x apertium-get
+   ./apertium-get fie-bar
+   #+END_SRC
+
+   The data will be placed under your current working directory. If
+   you later run =apertium-get fie-fum= from the same directory, it'll
+   just update apertium-fie, not redownload it (so you can actually
+   use this script as a simple way to do =svn up && make= for a pair
+   and its dependencies as well).
+
+   You can also get a listing of available pairs by passing the =-l=
+   argument to =apertium-get=, see =apertium-get -h= for more
+   information.
+
+
+   If you installed a monolingual dependency through =apt-get= or
+   similar (or otherwise have it installed in your =PKG_CONFIG_PATH=),
+   then you can choose to skip that dependency and use the installed
+   version with =-x DEP=. For example, to avoid compiling the sme
+   package before getting apertium-sme-nob, do:
+
+   #+BEGIN_SRC sh
+   sudo apt-get install giella-sme
+   ./apertium-get -x sme sme-nob
+   #+END_SRC
+
+** Giellatekno data
+
+   If you have the standard Giellatekno data setup with the SVN trunk
+   checkout in a =GTHOME= variable, then =apertium-get= will try to
+   reuse data from your =$GTHOME=, which should make compilation
+   faster. You should be able to run
+
+   #+BEGIN_SRC sh
+   ./apertium-get myv-mdf
+   #+END_SRC
+
+   and have it use the gtcore, langs/myv and langs/mdf from your
+   =GTHOME= SVN checkout.
+
+*** Using =apertium-get= without =GTHOME=
+
+    If =GTHOME= is unset, then =apertium-get= will download and
+    compile Giellatekno data just like Apertium data.
+
+    If you have =GTHOME=, but want to force =apertium-get= to not use
+    it for whatever reason, simply run the program with the variable
+    emptied, e.g.
+
+    #+BEGIN_SRC sh
+    GTHOME= ./apertium-get myv-mdf
+    #+END_SRC

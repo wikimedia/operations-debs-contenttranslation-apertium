@@ -3,12 +3,11 @@
 
 AC_PREREQ(2.52)
 
-m4_define([required_lttoolbox_version], [3.3.3])
+m4_define([required_lttoolbox_version], [3.4.0])
 m4_define([required_libxml_version], [2.6.17])
 m4_define([required_libpcre_version], [6.4])
-#m4_define([required_pkg_config_version], [0.15])
 
-AC_INIT([apertium], [3.4.2], [sortiz@users.sourceforge.net])
+AC_INIT([apertium], [3.5.0], [sortiz@users.sourceforge.net])
 AC_CONFIG_HEADER([apertium/apertium_config.h])
 
 AC_CANONICAL_SYSTEM
@@ -17,7 +16,7 @@ GENERIC_LIBRARY_NAME=apertium
 
 # Release versioning
 GENERIC_MAJOR_VERSION=3
-GENERIC_MINOR_VERSION=4
+GENERIC_MINOR_VERSION=5
 GENERIC_MICRO_VERSION=0
 
 # API version (often = GENERIC_MAJOR_VERSION.GENERIC_MINOR_VERSION)
@@ -26,7 +25,7 @@ AC_SUBST(GENERIC_API_VERSION)
 AC_SUBST(GENERIC_MAJOR_VERSION)
 
 # Shared library versioning
-GENERIC_LIBRARY_VERSION=0:0:0
+GENERIC_LIBRARY_VERSION=1:0:0
 #                       | | |
 #                +------+ | +---+
 #                |        |     |
@@ -51,10 +50,10 @@ AC_SUBST(GENERIC_VERSION)
 VERSION=$GENERIC_VERSION
 
 AM_INIT_AUTOMAKE(no-define)
+AC_CONFIG_MACRO_DIR([m4])
 
 AC_PROG_CXX
 AC_PROG_LIBTOOL
-AM_SANITY_CHECK
 AC_LANG_CPLUSPLUS
 
 CFLAGS="-Wall -Wextra $CFLAGS"
@@ -107,16 +106,6 @@ fi
 if test x$ac_cv_path_FLEX = xno
 then
   AC_MSG_ERROR([You don't have flex installed.])
-fi
-
-AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-if test x$ac_cv_path_PKG_CONFIG = x
-then
-  AC_MSG_ERROR([You don't have pkg-config installed.])
-fi
-if test x$ac_cv_path_PKG_CONFIG = xno
-then
-  AC_MSG_ERROR([You don't have pkg-config installed.])
 fi
 
 AC_CHECK_FUNCS(strcasecmp)
@@ -179,11 +168,27 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
 
-AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, fputc_unlocked, fputs_unlocked, getopt_long, fgetwc_unlocked, fputwc_unlocked, fgetws_unlocked, fputws_unlocked])
-
-AC_CHECK_FUNCS([setlocale strdup getopt_long snprintf mbtowc])
+AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, fputc_unlocked, fputs_unlocked, getopt, getopt_long, fgetwc_unlocked, fputwc_unlocked, fgetws_unlocked, fputws_unlocked])
+AC_CHECK_FUNCS([setlocale strdup getopt snprintf mbtowc])
+AC_REPLACE_FUNCS(getopt_long)
 
 AM_CONDITIONAL([WINDOWS], [test x$version_type = xwindows])
-AS_IF([test x$version_type = xwindows], [AC_DEFINE(HAVE_GETOPT_LONG,0)], [])
+#AS_IF([test x$version_type = xwindows], [AC_DEFINE(HAVE_GETOPT_LONG,0)], [])
 
-AC_OUTPUT([Makefile apertium.pc apertium/Makefile])
+# Checks for highest supported C++ standard
+AC_LANG(C++)
+AX_CHECK_COMPILE_FLAG([-std=c++20], [CXXFLAGS="$CXXFLAGS -std=c++20"], [
+ AX_CHECK_COMPILE_FLAG([-std=c++2a], [CXXFLAGS="$CXXFLAGS -std=c++2a"], [
+  AX_CHECK_COMPILE_FLAG([-std=c++17], [CXXFLAGS="$CXXFLAGS -std=c++17"], [
+   AX_CHECK_COMPILE_FLAG([-std=c++1z], [CXXFLAGS="$CXXFLAGS -std=c++1z"], [
+    AX_CHECK_COMPILE_FLAG([-std=c++14], [CXXFLAGS="$CXXFLAGS -std=c++14"], [
+     AX_CHECK_COMPILE_FLAG([-std=c++1y], [CXXFLAGS="$CXXFLAGS -std=c++1y"], [
+      AX_CHECK_COMPILE_FLAG([-std=c++11], [CXXFLAGS="$CXXFLAGS -std=c++11"], [])
+     ])
+    ])
+   ])
+  ])
+ ])
+])
+
+AC_OUTPUT([Makefile apertium.pc apertium/Makefile tests/Makefile tests/tagger/Makefile])
