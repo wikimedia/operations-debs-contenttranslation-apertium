@@ -23,6 +23,7 @@ h_sources = a.h \
 	    feature_vec.h \
 	    feature_vec_averager.h \
 	    file_tagger.h \
+	    getopt_long.h \
 	    hmm.h \
 	    i.h \
 	    interchunk.h \
@@ -52,6 +53,7 @@ h_sources = a.h \
 	    stream_tagger.h \
 	    stream_tagger_trainer.h \
 	    streamed_type.h \
+	    string_to_wostream.h \
 	    string_utils.h \
 	    shell_utils.h \
 	    tag.h \
@@ -291,7 +293,7 @@ apertium_tagger_SOURCES = apertium_tagger.cc
 apertium_tagger_LDADD = $(APERTIUM_LIBS) -lapertium$(GENERIC_MAJOR_VERSION) $(lib_LTLIBRARIES)
 
 apertium_perceptron_trace_SOURCES = apertium_perceptron_trace.cc
-apertium_perceptron_trace_LDADD = $(APERTIUM_LIBS) -lapertium$(GENERIC_MAJOR_VERSION)
+apertium_perceptron_trace_LDADD = $(APERTIUM_LIBS) -lapertium$(GENERIC_MAJOR_VERSION) $(lib_LTLIBRARIES)
 
 apertium_tmxbuild_SOURCES = apertium_tmxbuild.cc
 apertium_tmxbuild_LDADD = $(APERTIUM_LIBS) -lapertium$(GENERIC_MAJOR_VERSION) $(lib_LTLIBRARIES)
