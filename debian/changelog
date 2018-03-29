@@ -1,3 +1,11 @@
+apertium (3.5.1-1+wmf1) jessie-wikimedia; urgency=low
+
+  * New upstream release.
+  * Depends on latest lttoolbox-dev.
+  * Other minor updates.
+
+ -- Kartik Mistry <kartik@debian.org>  Tue, 27 Mar 2018 09:07:42 +0530
+
 apertium (3.4.2~r68466-3+wmf1) jessie-wikimedia; urgency=low
 
   * debian/control:
