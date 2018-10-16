@@ -101,7 +101,7 @@ translate_latex()
   set -o pipefail
   "$APERTIUM_PATH/apertium-prelatex" "$INFILE" | \
     "$APERTIUM_PATH/apertium-utils-fixlatex" | \
-    "$APERTIUM_PATH/apertium-deslatex" ${FORMAT_OPTIONS} | \
+    "$APERTIUM_PATH/apertium-deslatex" "${FORMAT_OPTIONS[@]}" | \
     if [ "$TRANSLATION_MEMORY_FILE" = "" ];
     then cat;
     else "$APERTIUM_PATH/lt-tmxproc" "$TMCOMPFILE";
@@ -145,7 +145,7 @@ translate_odt ()
   unzip -q -o -d "$INPUT_TMPDIR" "$INFILE"
   find "$INPUT_TMPDIR" | grep "content\\.xml\\|styles\\.xml" |\
   awk '{printf "<file name=\"" $0 "\"/>"; PART = $0; while(getline < PART) printf(" %s", $0); printf("\n");}' |\
-  "$APERTIUM_PATH/apertium-desodt" ${FORMAT_OPTIONS} |\
+  "$APERTIUM_PATH/apertium-desodt" "${FORMAT_OPTIONS[@]}" |\
   if [ "$TRANSLATION_MEMORY_FILE" = "" ];
   then cat;
   else "$APERTIUM_PATH/lt-tmxproc" "$TMCOMPFILE";
@@ -202,7 +202,7 @@ translate_docx ()
   find "$INPUT_TMPDIR" | grep "xml" |\
   grep -v -i \\\(settings\\\|theme\\\|styles\\\|font\\\|rels\\\|docProps\\\) |\
   awk '{printf "<file name=\"" $0 "\"/>"; PART = $0; while(getline < PART) printf(" %s", $0); printf("\n");}' |\
-  "$APERTIUM_PATH/apertium-deswxml" ${FORMAT_OPTIONS} |\
+  "$APERTIUM_PATH/apertium-deswxml" "${FORMAT_OPTIONS[@]}" |\
   if [ "$TRANSLATION_MEMORY_FILE" = "" ];
   then cat;
   else "$APERTIUM_PATH/lt-tmxproc" "$TMCOMPFILE";
@@ -256,9 +256,9 @@ translate_pptx ()
   done;
 
   find "$INPUT_TMPDIR" | grep "xml$" |\
-  grep "slides\/slide" |\
+  grep "slides\\/slide" |\
   awk '{printf "<file name=\"" $0 "\"/>"; PART = $0; while(getline < PART) printf(" %s", $0); printf("\n");}' |\
-  "$APERTIUM_PATH/apertium-despptx" ${FORMAT_OPTIONS} |\
+  "$APERTIUM_PATH/apertium-despptx" "${FORMAT_OPTIONS[@]}" |\
   if [ "$TRANSLATION_MEMORY_FILE" = "" ];
   then cat;
   else "$APERTIUM_PATH/lt-tmxproc" "$TMCOMPFILE";
@@ -301,7 +301,7 @@ translate_xlsx ()
   unzip -q -o -d "$INPUT_TMPDIR" "$INFILE"
   find "$INPUT_TMPDIR" | grep "sharedStrings.xml" |\
   awk '{printf "<file name=\"" $0 "\"/>"; PART = $0; while(getline < PART) printf(" %s", $0); printf("\n");}' |\
-  "$APERTIUM_PATH/apertium-desxlsx" ${FORMAT_OPTIONS} |\
+  "$APERTIUM_PATH/apertium-desxlsx" "${FORMAT_OPTIONS[@]}" |\
   if [ "$TRANSLATION_MEMORY_FILE" = "" ];
   then cat;
   else "$APERTIUM_PATH/lt-tmxproc" "$TMCOMPFILE";
@@ -328,7 +328,7 @@ translate_xlsx ()
 
 translate_htmlnoent ()
 {
-  "$APERTIUM_PATH/apertium-deshtml" ${FORMAT_OPTIONS} "$INFILE" | \
+  "$APERTIUM_PATH/apertium-deshtml" "${FORMAT_OPTIONS[@]}" "$INFILE" | \
       if [ "$TRANSLATION_MEMORY_FILE" = "" ]; then
           cat
       else "$APERTIUM_PATH/lt-tmxproc" "$TMCOMPFILE";
@@ -383,17 +383,17 @@ FORMAT="txt"
 DATADIR=$DEFAULT_DIRECTORY
 TRANSLATION_MEMORY_DIRECTION=$PAIR
 LIST_MODES_AND_EXIT=false
-FORMAT_OPTIONS=""
+FORMAT_OPTIONS=()
 
 # Skip (but store) non-option arguments that come before options:
 declare -a ARGS_PREOPT ARGS_ALL
 declare -i OPTIND=1
-ARGS_ALL=( $@ )              # so we can index into it with a variable
+ARGS_ALL=( "$@" )              # so we can index into it with a variable
 while [[ $OPTIND -le $# ]]; do
   arg=${ARGS_ALL[$OPTIND-1]}
   case $arg in
     -*) break ;;
-    *) ARGS_PREOPT+=($arg); (( OPTIND++ )) ;;
+    *) ARGS_PREOPT+=( "$arg" ); (( OPTIND++ )) ;;
   esac
 done
 
@@ -405,7 +405,7 @@ while getopts ":uahlf:d:m:o:n" opt; do
     m) TRANSLATION_MEMORY_FILE=$OPTARG ;;
     o) TRANSLATION_MEMORY_DIRECTION=$OPTARG ;;
     u) UWORDS="no" ;;
-    n) FORMAT_OPTIONS="-n" ;;
+    n) FORMAT_OPTIONS+=(-n) ;;
     a) OPTION_TAGGER="-m" ;;
     l) LIST_MODES_AND_EXIT=true ;;
     h) message ;;
@@ -487,18 +487,6 @@ case "$FORMAT" in
     else OPTION="-g";
     fi;
     ;;
-  rtf)
-    if [ "$UWORDS" = "no" ]; then OPTION="-n";
-    else OPTION="-g";
-    fi;
-    MILOCALE=$(locale -a|grep -i -v "utf\|^C$\|^POSIX$"|head -1);
-    if [ "$MILOCALE" = "" ]; then
-      echo "Error: Install a ISO-8859-1 compatible locale in your system";
-      exit 1;
-    fi
-    export LC_CTYPE=$MILOCALE
-    ;;
-
   odt)
     if [ "$UWORDS" = "no" ]; then OPTION="-n";
     else OPTION="-g";
@@ -527,8 +515,8 @@ case "$FORMAT" in
     translate_line
     exit 0
     ;;
-  
-  
+
+
   docx)
     if [ "$UWORDS" = "no" ]; then OPTION="-n";
     else OPTION="-g";
@@ -557,14 +545,14 @@ case "$FORMAT" in
     translate_htmlnoent
     exit 0
     ;;
-  
+
   wxml)
     if [ "$UWORDS" = "no" ]; then OPTION="-n";
     else OPTION="-g";
     fi;
     locale_utf8
     ;;
-  
+
   txtu)
     FORMAT="txt";
     OPTION="-n"
@@ -580,7 +568,7 @@ case "$FORMAT" in
   rtfu)
     FORMAT="rtf";
     OPTION="-n";
-    MILOCALE=$(locale -a|grep -i -v "utf\|^C$\|^POSIX$"|head -1);
+    MILOCALE=$(locale -a|grep -i -v "utf\\|^C$\\|^POSIX$"|head -1);
     if [ "$MILOCALE" = "" ]; then
       echo "Error: Install a ISO-8859-1 compatible locale in your system";
       exit 1;
@@ -635,7 +623,7 @@ set -e -o pipefail
 if [ "$FORMAT" = "none" ]; then
     cat "$INFILE"
 else
-  "$APERTIUM_PATH/apertium-des$FORMAT" ${FORMAT_OPTIONS} "$INFILE"
+  "$APERTIUM_PATH/apertium-des$FORMAT" "${FORMAT_OPTIONS[@]}" "$INFILE"
 fi | if [ "$TRANSLATION_MEMORY_FILE" = "" ];
      then
          cat

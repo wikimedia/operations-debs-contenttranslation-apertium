@@ -83,7 +83,7 @@ AS_HELP_STRING([--with-lang][$1],dnl
 # in your Makefile.am with _at most one mode_ (the others will be
 # created even if you list only one, listing several will lead to
 # trouble with parallell make).
-# 
+#
 # Install the modes by making install-data-local dependent on
 # install-modes, ie.
 #
@@ -94,11 +94,12 @@ AS_HELP_STRING([--with-lang][$1],dnl
 # dependent on .deps/.d, e.g.
 #
 #     .deps/intermediate.dix: original.dix .deps/.d
-# 
+#
 # ------------------------------------------
 AC_DEFUN([AP_MKINCLUDE],
 [
   AC_SUBST_FILE(ap_include)
+  AC_PROG_MKDIR_P
   ap_include=$srcdir/ap_include.am
 
   cat >$srcdir/ap_include.am <<EOF
@@ -115,7 +116,7 @@ install-modes:
 	apertium-gen-modes -f modes.xml \$(prefix)/share/apertium/\$(BASENAME)
 	rm -rf modes
 	mv modes.bak modes
-	test -d \$(DESTDIR)\$(apertium_modesdir) || mkdir \$(DESTDIR)\$(apertium_modesdir)
+	\$(MKDIR_P) \$(DESTDIR)\$(apertium_modesdir)
 	modes=\`xmllint --xpath '//mode@<:@@install="yes"@:>@/@name' modes.xml | sed 's/ *name="\(@<:@^"@:>@*\)"/\1.mode /g'\`; \\
 		if test -n "\$\$modes"; then \\
 			\$(INSTALL_DATA) \$\$modes \$(DESTDIR)\$(apertium_modesdir); \\
@@ -123,7 +124,7 @@ install-modes:
 		fi
 
 .deps/.d:
-	test -d .deps || mkdir .deps
+	\$(MKDIR_P) .deps
 	touch \$[]@
 
 .PRECIOUS: .deps/.d

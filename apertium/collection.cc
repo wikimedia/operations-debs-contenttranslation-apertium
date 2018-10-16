@@ -28,7 +28,7 @@ Collection::size()
   return element.size();
 }
 
-bool 
+bool
 Collection::has_not(const set<int> &t)
 {
   return index.find(t) == index.end();
@@ -45,7 +45,9 @@ Collection::operator[](const set<int> &t)
 {
   if(has_not(t))
   {
-    index[t] = index.size()-1;
+    int position = index.size();
+    index[t] = position;
+
     element.push_back(&(index.find(t)->first));
   }
   return index[t];
@@ -65,7 +67,7 @@ Collection::write(FILE *output)
   for(int i = 0, limit = element.size(); i != limit; i++)
   {
     Compression::multibyte_write(element[i]->size(), output);
-    for(set<int>::const_iterator it = element[i]->begin(), 
+    for(set<int>::const_iterator it = element[i]->begin(),
 	  limit2 = element[i]->end(); it != limit2; it++)
     {
       Compression::multibyte_write(*it, output);
