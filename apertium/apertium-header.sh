@@ -22,7 +22,7 @@ message ()
   echo "USAGE: $(basename "$0") [-d datadir] [-f format] [-u] <direction> [in [out]]"
   echo " -d datadir       directory of linguistic data"
   echo " -f format        one of: txt (default), html, rtf, odt, docx, wxml, xlsx, pptx,"
-  echo "                  xpresstag, html-noent, latex, latex-raw, line"
+  echo "                  xpresstag, html-noent, html-alt, latex, latex-raw, line"
   echo " -a               display ambiguity"
   echo " -u               don't display marks '*' for unknown words"
   echo " -n               don't insert period before possible sentence-ends"
@@ -65,12 +65,12 @@ check_encoding () {
 
 test_zip ()
 {
-  if [ "$(which zip)" = "" ]; then
+  if ! command -v zip &>/dev/null; then
     echo "Error: Install 'zip' command in your system";
     exit 1;
   fi
 
-  if [ "$(which unzip)" = "" ]; then
+  if ! command -v unzip &>/dev/null; then
     echo "Error: Install 'unzip' command in your system";
     exit 1;
   fi
@@ -78,13 +78,11 @@ test_zip ()
 
 test_gawk ()
 {
-  GAWK=$(which gawk)
-  if [ "$GAWK" = "" ]; then
+  if ! command -v gawk &>/dev/null; then
     echo "Error: Install 'gawk' in your system"
     exit 1
   fi
 }
-
 
 translate_latex()
 {
@@ -143,7 +141,7 @@ translate_odt ()
   OTRASALIDA=$(mktemp "$TMPDIR/apertium.XXXXXXXX")
 
   unzip -q -o -d "$INPUT_TMPDIR" "$INFILE"
-  find "$INPUT_TMPDIR" | grep "content\\.xml\\|styles\\.xml" |\
+  find "$INPUT_TMPDIR" -name content.xml -o -name styles.xml |\
   awk '{printf "<file name=\"" $0 "\"/>"; PART = $0; while(getline < PART) printf(" %s", $0); printf("\n");}' |\
   "$APERTIUM_PATH/apertium-desodt" "${FORMAT_OPTIONS[@]}" |\
   if [ "$TRANSLATION_MEMORY_FILE" = "" ];
@@ -192,15 +190,15 @@ translate_docx ()
 
   unzip -q -o -d "$INPUT_TMPDIR" "$INFILE"
 
-  for i in $(find "$INPUT_TMPDIR"|grep "xlsx$");
-  do LOCALTEMP=$(mktemp "$TMPDIR/apertium.XXXXXXXX");
+  find "$INPUT_TMPDIR" -name "*.xlsx" -print0 | while read -r -d '' i; do
+    LOCALTEMP=$(mktemp "$TMPDIR/apertium.XXXXXXXX");
     "$APERTIUM_PATH/apertium" -f xlsx -d "$DATADIR" "$OPCIONU" "$PAIR" <"$i" >"$LOCALTEMP";
     cp "$LOCALTEMP" "$i";
     rm "$LOCALTEMP";
   done;
 
-  find "$INPUT_TMPDIR" | grep "xml" |\
-  grep -v -i \\\(settings\\\|theme\\\|styles\\\|font\\\|rels\\\|docProps\\\) |\
+  find "$INPUT_TMPDIR" -name "*.xml" |\
+  grep -E -v -i '(settings|theme|styles|font|rels|docProps)' |\
   awk '{printf "<file name=\"" $0 "\"/>"; PART = $0; while(getline < PART) printf(" %s", $0); printf("\n");}' |\
   "$APERTIUM_PATH/apertium-deswxml" "${FORMAT_OPTIONS[@]}" |\
   if [ "$TRANSLATION_MEMORY_FILE" = "" ];
@@ -248,15 +246,14 @@ translate_pptx ()
 
   unzip -q -o -d "$INPUT_TMPDIR" "$INFILE"
 
-  for i in $(find "$INPUT_TMPDIR"|grep "xlsx$"); do
+  find "$INPUT_TMPDIR" -name "*.xlsx" -print0 | while read -r -d '' i; do
     LOCALTEMP=$(mktemp "$TMPDIR/apertium.XXXXXXXX")
     "$APERTIUM_PATH/apertium" -f xlsx -d "$DATADIR" "$OPCIONU" "$PAIR" <"$i" >"$LOCALTEMP";
     cp "$LOCALTEMP" "$i"
     rm "$LOCALTEMP"
   done;
 
-  find "$INPUT_TMPDIR" | grep "xml$" |\
-  grep "slides\\/slide" |\
+  find . -path '**/slides/slide*.xml' |\
   awk '{printf "<file name=\"" $0 "\"/>"; PART = $0; while(getline < PART) printf(" %s", $0); printf("\n");}' |\
   "$APERTIUM_PATH/apertium-despptx" "${FORMAT_OPTIONS[@]}" |\
   if [ "$TRANSLATION_MEMORY_FILE" = "" ];
@@ -299,7 +296,7 @@ translate_xlsx ()
   OTRASALIDA=$(mktemp "$TMPDIR/apertium.XXXXXXXX")
 
   unzip -q -o -d "$INPUT_TMPDIR" "$INFILE"
-  find "$INPUT_TMPDIR" | grep "sharedStrings.xml" |\
+  find "$INPUT_TMPDIR" -name "sharedStrings.xml" |\
   awk '{printf "<file name=\"" $0 "\"/>"; PART = $0; while(getline < PART) printf(" %s", $0); printf("\n");}' |\
   "$APERTIUM_PATH/apertium-desxlsx" "${FORMAT_OPTIONS[@]}" |\
   if [ "$TRANSLATION_MEMORY_FILE" = "" ];
@@ -329,6 +326,22 @@ translate_xlsx ()
 translate_htmlnoent ()
 {
   "$APERTIUM_PATH/apertium-deshtml" "${FORMAT_OPTIONS[@]}" "$INFILE" | \
+      if [ "$TRANSLATION_MEMORY_FILE" = "" ]; then
+          cat
+      else "$APERTIUM_PATH/lt-tmxproc" "$TMCOMPFILE";
+      fi | if [ ! -x "$DATADIR/modes/$PAIR.mode" ]; then
+      sh "$DATADIR/modes/$PAIR.mode" "$OPTION" "$OPTION_TAGGER"
+  else "$DATADIR/modes/$PAIR.mode" "$OPTION" "$OPTION_TAGGER"
+  fi | if [ "$FORMAT" = "none" ]; then
+      if [ "$REDIR" == "" ]; then cat; else cat > "$SALIDA"; fi
+  else
+    if [ "$REDIR" == "" ]; then "$APERTIUM_PATH/apertium-rehtml-noent"; else "$APERTIUM_PATH/apertium-rehtml-noent" > "$SALIDA"; fi
+  fi
+}
+
+translate_htmlalt ()
+{
+  "$APERTIUM_PATH/apertium-deshtml-alt" "${FORMAT_OPTIONS[@]}" "$INFILE" | \
       if [ "$TRANSLATION_MEMORY_FILE" = "" ]; then
           cat
       else "$APERTIUM_PATH/lt-tmxproc" "$TMCOMPFILE";
@@ -426,18 +439,10 @@ case "$#" in
     REDIR=">"
     INFILE=$2
     PAIR=$1
-    if [[ ! -e "$INFILE" ]]; then
-      echo "Error: file '$INFILE' not found." >&2
-      message >&2
-    fi
     ;;
   2)
     INFILE=$2
     PAIR=$1
-    if [[ ! -e "$INFILE" ]]; then
-      echo "Error: file '$INFILE' not found." >&2
-      message >&2
-    fi
     ;;
   1)
     PAIR=$1
@@ -447,6 +452,13 @@ case "$#" in
     ;;
 esac
 
+if [[ ! -e "$INFILE" ]]; then
+  echo "Error: file '$INFILE' not found." >&2
+  message >&2
+elif [[ ! -r "$INFILE" ]]; then
+  echo "Error: file '$INFILE' is not readable by you." >&2
+  message >&2
+fi
 
 if [[ -n $TRANSLATION_MEMORY_FILE ]]; then
   if ! "$APERTIUM_PATH/lt-tmxcomp" "$TRANSLATION_MEMORY_DIRECTION" "$TRANSLATION_MEMORY_FILE" "$TMCOMPFILE" >/dev/null; then
@@ -463,7 +475,7 @@ fi
 
 if [[ ! -e "$DATADIR/modes/$PAIR.mode" ]]; then
   echo -n "Error: Mode $PAIR does not exist"
-  c=$(find "$DATADIR/modes"|wc -l)
+  c=$(find "$DATADIR/modes" -name '*.mode' | wc -l)
   if [ "$c" -le 1 ]; then
     echo "."
   else
@@ -545,6 +557,13 @@ case "$FORMAT" in
     translate_htmlnoent
     exit 0
     ;;
+  html-alt)
+    if [ "$UWORDS" = "no" ]; then OPTION="-n";
+    else OPTION="-g";
+    fi;
+    translate_htmlalt
+    exit 0
+    ;;
 
   wxml)
     if [ "$UWORDS" = "no" ]; then OPTION="-n";
@@ -568,7 +587,7 @@ case "$FORMAT" in
   rtfu)
     FORMAT="rtf";
     OPTION="-n";
-    MILOCALE=$(locale -a|grep -i -v "utf\\|^C$\\|^POSIX$"|head -1);
+    MILOCALE=$(locale -a | grep -E -i -v -m1 'utf|^C|^POSIX$')
     if [ "$MILOCALE" = "" ]; then
       echo "Error: Install a ISO-8859-1 compatible locale in your system";
       exit 1;
@@ -608,6 +627,7 @@ case "$FORMAT" in
 
 
   *) # Por defecto asumimos txt
+    echo "$0 WARNING: Unknown format ${FORMAT}, treating as 'txt'" >&2
     FORMAT="txt"
     OPTION="-g"
     ;;
