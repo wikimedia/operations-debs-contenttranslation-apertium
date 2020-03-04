@@ -1,0 +1,7 @@
+# The warning "name expected (got '\c'): treated as missing" is a false positive. The .Lk syntax is correct.
+manpage-has-errors-from-man
+# We are not building python binding
+python-script-but-no-python-dep usr/bin/apertium-genvdix
+python-script-but-no-python-dep usr/bin/apertium-genvldix
+python-script-but-no-python-dep usr/bin/apertium-genvrdix
+python-script-but-no-python-dep usr/bin/apertium-metalrx
