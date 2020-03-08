@@ -1,3 +1,9 @@
+apertium (3.6.1-1+wmf2) jessie-wikimedia; urgency=low
+
+  * Depends on lttoolbox >= 3.5.1 and fixed conflict.
+
+ -- Kartik Mistry <kartik@debian.org>  Mon, 09 Mar 2020 16:23:11 +0530
+
 apertium (3.6.1-1+wmf1) jessie-wikimedia; urgency=low
 
   * New upstream release
